@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetroTrade — Fuel Card Application</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f6f9; color: #1a1a1a; font-size: 15px; line-height: 1.6; }
+  .page-wrap { max-width: 780px; margin: 2rem auto; padding: 0 1rem 4rem; }
+
+  .logo-bar { background: #ffffff; border-radius: 12px; border: 1px solid #e0e4ea; padding: 1.5rem 2rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+  .logo-bar .brand { color: #E6F1FB; font-size: 22px; font-weight: 600; }
+  .logo-bar .sub { color: #85B7EB; font-size: 13px; margin-top: 3px; }
+  .logo-bar .badge { background: #f0f4f8; color: #185FA5; font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 1px solid #d0d8e4; }
+
+  .section { background: #ffffff; border: 1px solid #e0e4ea; border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 1.25rem; }
+  .section-title { font-size: 11px; font-weight: 600; color: #185FA5; margin-bottom: 1.25rem; padding-bottom: 10px; border-bottom: 1px solid #e8ecf0; text-transform: uppercase; letter-spacing: 1px; }
+
+  .field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field.full { grid-column: 1 / -1; }
+  .field label { font-size: 12px; color: #555; font-weight: 500; }
+  .field input, .field select, .field textarea {
+    font-size: 14px; padding: 9px 11px;
+    border: 1px solid #d0d5dd; border-radius: 8px;
+    background: #fafbfc; color: #1a1a1a; width: 100%;
+    outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: #378ADD; box-shadow: 0 0 0 3px rgba(55,138,221,0.15);
+  }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .required { color: #e24b4a; }
+  .hint { font-size: 11px; color: #888; margin-top: 3px; }
+
+  .check-group { display: flex; flex-direction: column; gap: 10px; }
+  .check-item { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #1a1a1a; cursor: pointer; }
+  .check-item input[type=checkbox] { width: 17px; height: 17px; accent-color: #185FA5; cursor: pointer; flex-shrink: 0; }
+
+  .table-wrapper { overflow-x: auto; }
+  table.data-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; min-width: 560px; }
+  table.data-table th { background: #f0f4f8; color: #555; font-weight: 600; font-size: 11px; padding: 9px 8px; border: 1px solid #dde2ea; text-align: left; text-transform: uppercase; letter-spacing: .5px; }
+  table.data-table td { padding: 4px 4px; border: 1px solid #dde2ea; }
+  table.data-table td input, table.data-table td select {
+    border: none; background: transparent; width: 100%;
+    font-size: 13px; color: #1a1a1a; padding: 6px 6px; outline: none; border-radius: 4px;
+  }
+  table.data-table td input:focus, table.data-table td select:focus { background: #EBF4FF; }
+  .add-row-btn { margin-top: 10px; font-size: 13px; padding: 7px 16px; border: 1px solid #c0c8d4; border-radius: 8px; background: transparent; color: #555; cursor: pointer; transition: background .15s; }
+  .add-row-btn:hover { background: #f0f4f8; }
+  .del-btn { background: none; border: none; color: #e24b4a; cursor: pointer; font-size: 18px; padding: 4px 6px; line-height: 1; border-radius: 4px; }
+  .del-btn:hover { background: #fdf0f0; }
+
+  .sig-outer { border: 1px solid #d0d5dd; border-radius: 8px; background: #fafbfc; overflow: hidden; }
+  .sig-canvas { display: block; width: 100%; cursor: crosshair; touch-action: none; }
+  .sig-actions { display: flex; gap: 8px; margin-top: 8px; }
+  .sig-btn { font-size: 12px; padding: 6px 14px; border: 1px solid #d0d5dd; border-radius: 8px; background: #fff; color: #555; cursor: pointer; }
+  .sig-btn:hover { background: #f4f6f9; }
+  .sig-note { font-size: 11px; color: #888; margin-top: 6px; }
+
+  .submit-btn {
+    width: 100%; padding: 15px; background: #0C447C; color: #fff;
+    border: none; border-radius: 10px; font-size: 16px; font-weight: 600;
+    cursor: pointer; margin-top: 1.5rem; letter-spacing: .3px; transition: background .15s;
+  }
+  .submit-btn:hover { background: #185FA5; }
+  .submit-btn:disabled { background: #6b9fc2; cursor: not-allowed; }
+
+  .toast { display: none; border-radius: 10px; padding: 16px 20px; font-size: 14px; margin-top: 1.25rem; text-align: center; font-weight: 500; }
+  .toast.success { display: block; background: #EAF3DE; border: 1px solid #639922; color: #27500A; }
+  .toast.warning { display: block; background: #FAEEDA; border: 1px solid #BA7517; color: #633806; }
+
+  .setup-note { background: #EBF4FF; border: 1px solid #B5D4F4; border-radius: 10px; padding: 1.25rem 1.5rem; margin-top: 1.25rem; font-size: 13px; color: #0C447C; }
+  .setup-note strong { font-weight: 600; display: block; margin-bottom: 6px; font-size: 14px; }
+  .setup-note ol { margin-left: 1.25rem; margin-top: 6px; }
+  .setup-note li { margin-bottom: 4px; }
+  .setup-note a { color: #185FA5; }
+
+
+  #scrollTopBtn {
+    position: fixed; bottom: 2rem; right: 1.5rem;
+    width: 44px; height: 44px;
+    background: #0C447C; color: #fff;
+    border: none; border-radius: 50%;
+    font-size: 20px; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    display: none; align-items: center; justify-content: center;
+    z-index: 999; transition: background .15s, opacity .2s;
+  }
+  #scrollTopBtn:hover { background: #185FA5; }
+  @media (max-width: 600px) {
+    .logo-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .section { padding: 1rem 1rem; }
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+function clearAllData() {
+  if (!confirm('Are you sure you want to clear all entered data? This cannot be undone.')) return;
+
+  // Clear all text inputs, selects, textareas
+  document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], input[type="date"], input[type="number"], textarea').forEach(el => el.value = '');
+  document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+
+  // Reset vehicle table to 1 row
+  const vehicleBody = document.getElementById('tableBody');
+  while (vehicleBody.rows.length > 1) vehicleBody.deleteRow(vehicleBody.rows.length - 1);
+  vehicleBody.querySelectorAll('input').forEach(el => el.value = '');
+  vehicleBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+
+  // Reset limits table to 1 row
+  const limitsBody = document.getElementById('limitsBody');
+  while (limitsBody.rows.length > 1) limitsBody.deleteRow(limitsBody.rows.length - 1);
+  limitsBody.querySelectorAll('input').forEach(el => el.value = '');
+  limitsBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+
+  // Clear signature
+  clearSig();
+
+  // Hide conditional rows
+  document.getElementById('portalUsernameRow').style.display = 'none';
+  document.getElementById('alertEmailRow').style.display = 'none';
+
+  // Clear file upload
+  document.getElementById('f_id_upload').value = '';
+  document.getElementById('uploadStatus').style.display = 'none';
+  uploadedFile = null;
+
+  // Hide toast
+  document.getElementById('toast').className = 'toast';
+}
+
+window.addEventListener('scroll', function() {
+  const btn = document.getElementById('scrollTopBtn');
+  btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+function clearAllData() {
+  if (!confirm('Are you sure you want to clear all entered data? This cannot be undone.')) return;
+
+  // Clear all text inputs, selects, textareas
+  document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], input[type="date"], input[type="number"], textarea').forEach(el => el.value = '');
+  document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+
+  // Reset vehicle table to 1 row
+  const vehicleBody = document.getElementById('tableBody');
+  while (vehicleBody.rows.length > 1) vehicleBody.deleteRow(vehicleBody.rows.length - 1);
+  vehicleBody.querySelectorAll('input').forEach(el => el.value = '');
+  vehicleBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+
+  // Reset limits table to 1 row
+  const limitsBody = document.getElementById('limitsBody');
+  while (limitsBody.rows.length > 1) limitsBody.deleteRow(limitsBody.rows.length - 1);
+  limitsBody.querySelectorAll('input').forEach(el => el.value = '');
+  limitsBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+
+  // Clear signature
+  clearSig();
+
+  // Hide conditional rows
+  document.getElementById('portalUsernameRow').style.display = 'none';
+  document.getElementById('alertEmailRow').style.display = 'none';
+
+  // Clear file upload
+  document.getElementById('f_id_upload').value = '';
+  document.getElementById('uploadStatus').style.display = 'none';
+  uploadedFile = null;
+
+  // Hide toast
+  document.getElementById('toast').className = 'toast';
+}
+
+window.addEventListener('scroll', function() {
+  const btn = document.getElementById('scrollTopBtn');
+  btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+function clearAllData() {
+  if (!confirm('Are you sure you want to clear all entered data? This cannot be undone.')) return;
+
+  // Clear all text inputs, selects, textareas
+  document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], input[type="date"], input[type="number"], textarea').forEach(el => el.value = '');
+  document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+
+  // Reset vehicle table to 1 row
+  const vehicleBody = document.getElementById('tableBody');
+  while (vehicleBody.rows.length > 1) vehicleBody.deleteRow(vehicleBody.rows.length - 1);
+  vehicleBody.querySelectorAll('input').forEach(el => el.value = '');
+  vehicleBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+
+  // Reset limits table to 1 row
+  const limitsBody = document.getElementById('limitsBody');
+  while (limitsBody.rows.length > 1) limitsBody.deleteRow(limitsBody.rows.length - 1);
+  limitsBody.querySelectorAll('input').forEach(el => el.value = '');
+  limitsBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+
+  // Clear signature
+  clearSig();
+
+  // Hide conditional rows
+  document.getElementById('portalUsernameRow').style.display = 'none';
+  document.getElementById('alertEmailRow').style.display = 'none';
+
+  // Clear file upload
+  document.getElementById('f_id_upload').value = '';
+  document.getElementById('uploadStatus').style.display = 'none';
+  uploadedFile = null;
+
+  // Hide toast
+  document.getElementById('toast').className = 'toast';
+}
+
+window.addEventListener('scroll', function() {
+  const btn = document.getElementById('scrollTopBtn');
+  btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
+});
+</script>
+</head>
+<body>
+<div class="page-wrap">
+
+  <div class="logo-bar" style="flex-direction:column;align-items:center;text-align:center;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
+      <img src="data:image/png;base64,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" alt="PetroTrade logo" style="height:100px;width:auto;display:block;">
+      <div style="text-align:center;font-size:22px;font-weight:700;color:#1a1a1a;margin-top:10px;letter-spacing:.3px;">Fuel Card Application Form</div>
+    </div>
+  </div>
+
+  <!-- Personal Information -->
+  <div class="section">
+    <div class="section-title">1. Personal information</div>
+    <div class="field-grid">
+      <div class="field">
+        <label>Entity name or individual name <span class="required">*</span></label>
+        <input type="text" id="f_name" placeholder="Entity or individual name">
+      </div>
+      <div class="field">
+        <label>Contact person full name <span class="required">*</span></label>
+        <input type="text" id="f_contact" placeholder="Full name of contact person">
+      </div>
+      <div class="field">
+        <label>Date of birth <span class="required">*</span></label>
+        <input type="date" id="f_dob">
+      </div>
+      <div class="field">
+        <label>Gender</label>
+        <select id="f_gender">
+          <option value="">— Select —</option>
+          <option>Male</option>
+          <option>Female</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>ID / Passport number <span class="required">*</span></label>
+        <input type="text" id="f_id" placeholder="e.g. LB123456">
+      </div>
+
+
+      <div class="field">
+        <label>Nationality</label>
+        <input type="text" id="f_nat" placeholder="e.g. Liberian">
+      </div>
+      <div class="field">
+        <label>Phone number <span class="required">*</span></label>
+        <input type="tel" id="f_phone" placeholder="+231 77 000 0000">
+      </div>
+      <div class="field">
+        <label>Phone number 2</label>
+        <input type="tel" id="f_phone2" placeholder="+231 77 000 0000">
+      </div>
+      <div class="field">
+        <label>Email address <span class="required">*</span></label>
+        <input type="email" id="f_email" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <input type="text" id="f_notes_personal" placeholder="Any additional notes...">
+      </div>
+      <div class="field full">
+        <label>Residential address <span class="required">*</span></label>
+        <input type="text" id="f_addr" placeholder="Street, City, County">
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Cards Info -->
+  <div class="section">
+    <div class="section-title">2. Cards info</div>
+    <div class="field-grid">
+      <div class="field">
+        <label>Number of cards requested <span class="required">*</span></label>
+        <input type="number" id="f_num_cards" placeholder="e.g. 3" min="1" oninput="syncRowsToCardCount(this.value)">
+      </div>
+    </div>
+    <p style="font-size:13px;color:#666;margin:14px 0 10px">Add one row per vehicle or asset. Click <strong>+ Add row</strong> to include more.</p>
+    <div class="table-wrapper">
+      <table class="data-table" id="vehicleTable">
+        <thead>
+          <tr>
+            <th style="width:4%">#</th>
+            <th style="width:14%">Registration no.</th>
+            <th style="width:18%">Name or number (printed on card)</th>
+            <th style="width:16%">Card fuel type restriction</th>
+            <th style="width:14%">Fuel type</th>
+            <th style="width:16%">Vehicle model (optional)</th>
+            <th style="width:5%"></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr>
+            <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">1</td>
+            <td><input type="text" placeholder="e.g. LR-1234" oninput="syncRegToLimits(this)"></td>
+            <td><input type="text" placeholder="Name or number"></td>
+            <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">-</option><option>Yes</option><option>No</option></select></td>
+            <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">—</option><option>Diesel</option><option>Gasoline</option></select></td>
+            <td><input type="text" placeholder="e.g. Toyota Hilux"></td>
+            <td><button class="del-btn" onclick="removeRow(this)">×</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <button class="add-row-btn" onclick="addRow()">+ Add row</button>
+    <p style="margin-top:12px;font-size:13px;color:#c0392b;line-height:1.6;"><strong>Note:</strong><br>Card Fuel Restriction: Cards can only be used for the selected fuel type in the table. (Ex. If Yes is selected and Fuel Type is Gasoline, then the card can only be used for Gasoline)</p>
+    <p style="font-size:14px;font-weight:600;color:#1a1a1a;margin:18px 0 6px">Card limitations</p>
+    <p style="font-size:12px;color:#666;margin-bottom:10px">Limitations can be set as Amount, Quantity, or Transaction limit.</p>
+    <div class="table-wrapper">
+      <table class="data-table" id="limitsTable">
+        <thead>
+          <tr>
+            <th style="width:4%">#</th>
+            <th style="width:14%">Registration no.</th>
+            <th style="width:18%">Limit type</th>
+            <th style="width:13%">Per transaction</th>
+            <th style="width:13%">Per day</th>
+            <th style="width:13%">Per week</th>
+            <th style="width:13%">Per month</th>
+            <th style="width:5%"></th>
+          </tr>
+        </thead>
+        <tbody id="limitsBody">
+          <tr>
+            <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">1</td>
+            <td><input type="text" placeholder="Auto-filled" readonly style="background:#f0f4f8;color:#555;cursor:default;"></td>
+            <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">None</option><option>Amount (US$)</option><option>Quantity (Gallons)</option><option>Transaction (No. of Trx.)</option></select></td>
+            <td><input type="text" placeholder="0.00"></td>
+            <td><input type="text" placeholder="0.00"></td>
+            <td><input type="text" placeholder="0.00"></td>
+            <td><input type="text" placeholder="0.00"></td>
+            <td><button class="del-btn" onclick="removeLimitRow(this)">×</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <button class="add-row-btn" onclick="addLimitRow()">+ Add row</button>
+  </div>
+
+  <!-- PT E-Portal Access and Notifications -->
+  <div class="section">
+    <div class="section-title">3. PT E-Portal access and notifications</div>
+
+    <div class="field-grid" style="margin-bottom:14px">
+      <div class="field">
+        <label>PT Card Portal access</label>
+        <select id="f_portal_access" onchange="togglePortalUsername()">
+          <option value="">— Select —</option>
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-grid" id="portalUsernameRow" style="margin-bottom:14px;display:none">
+      <div class="field">
+        <label>PT Card Portal username</label>
+        <input type="text" id="f_portal_username" placeholder="Enter desired username">
+      </div>
+    </div>
+
+    <div class="field-grid" style="margin-bottom:14px">
+      <div class="field">
+        <label>Transaction email alerts</label>
+        <select id="f_email_alerts" onchange="toggleAlertEmail()">
+          <option value="">— Select —</option>
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-grid" id="alertEmailRow" style="display:none">
+      <div class="field full">
+        <label>Email address(es) for alerts</label>
+        <input type="text" id="f_alert_emails" placeholder="e.g. alerts@company.com, manager@company.com">
+        <span class="hint">Separate multiple email addresses with a comma</span>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Security Questions -->
+  <div class="section">
+    <div class="section-title">4. Security questions</div>
+
+    <div class="field-grid">
+      <div class="field">
+        <label>What is your favorite color? <span class="required">*</span></label>
+        <select id="f_color">
+          <option value="">— Select —</option>
+          <option>Red</option>
+          <option>Blue</option>
+          <option>Green</option>
+          <option>Yellow</option>
+          <option>Purple</option>
+          <option>Orange</option>
+          <option>Black</option>
+          <option>White</option>
+          <option>Pink</option>
+          <option>Brown</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>What is your favorite number? <span class="required">*</span></label>
+        <select id="f_number">
+          <option value="">— Select —</option>
+          <option>10</option><option>11</option><option>12</option><option>13</option><option>14</option>
+          <option>15</option><option>16</option><option>17</option><option>18</option><option>19</option>
+          <option>20</option><option>21</option><option>22</option><option>23</option><option>24</option>
+          <option>25</option><option>26</option><option>27</option><option>28</option><option>29</option>
+          <option>30</option><option>31</option><option>32</option><option>33</option><option>34</option>
+          <option>35</option><option>36</option><option>37</option><option>38</option><option>39</option>
+          <option>40</option><option>41</option><option>42</option><option>43</option><option>44</option>
+          <option>45</option><option>46</option><option>47</option><option>48</option><option>49</option>
+          <option>50</option><option>51</option><option>52</option><option>53</option><option>54</option>
+          <option>55</option><option>56</option><option>57</option><option>58</option><option>59</option>
+          <option>60</option><option>61</option><option>62</option><option>63</option><option>64</option>
+          <option>65</option><option>66</option><option>67</option><option>68</option><option>69</option>
+          <option>70</option><option>71</option><option>72</option><option>73</option><option>74</option>
+          <option>75</option><option>76</option><option>77</option><option>78</option><option>79</option>
+          <option>80</option><option>81</option><option>82</option><option>83</option><option>84</option>
+          <option>85</option><option>86</option><option>87</option><option>88</option><option>89</option>
+          <option>90</option><option>91</option><option>92</option><option>93</option><option>94</option>
+          <option>95</option><option>96</option><option>97</option><option>98</option><option>99</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Notes -->
+  <div class="section">
+    <div class="section-title">5. Additional notes</div>
+    <div class="field">
+      <label>Special requirements or comments</label>
+      <textarea id="f_notes" placeholder="Optional — enter any additional information here..."></textarea>
+    </div>
+  </div>
+
+  <!-- Terms -->
+  <div class="section">
+    <div class="section-title">6. Declaration</div>
+
+    <p style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:8px;">Terms &amp; Conditions</p>
+    <div style="border:1px solid #d0d5dd;border-radius:8px;background:#fafbfc;padding:1rem 1.25rem;max-height:260px;overflow-y:auto;font-size:13px;color:#333;line-height:1.7;">
+      <p style="font-weight:600;margin-bottom:10px;">Petro Trade FUEL CARD – TERMS AND CONDITIONS</p>
+
+      <p style="font-weight:600;margin-bottom:4px;">1. Definitions</p>
+      <p style="margin-bottom:6px;">For the purposes of these Terms and Conditions:</p>
+      <ul style="margin-left:1.25rem;margin-bottom:10px;">
+        <li><strong>"PT"</strong> means Petro Trade Inc.</li>
+        <li><strong>"Card"</strong> means the PT Fuel Card issued to the Customer.</li>
+        <li><strong>"Customer"</strong> means the individual or legal entity applying for and/or using the Card.</li>
+        <li><strong>"PIN"</strong> means the personal identification number associated with a Card.</li>
+      </ul>
+
+      <p style="font-weight:600;margin-bottom:4px;">2. Supply of Cards</p>
+      <p style="margin-bottom:4px;">2.1 Each Card shall be issued together with a corresponding PIN, which shall be delivered to the Customer under a separate sealed envelope or secure electronic means.</p>
+      <p style="margin-bottom:10px;">2.2 Ownership of the Card remains with PT at all times.</p>
+
+      <p style="font-weight:600;margin-bottom:4px;">3. Use of the Card</p>
+      <p style="margin-bottom:4px;">3.1 Cards authorize the Customer to purchase fuel and/or related products strictly in accordance with the limits, restrictions and specifications indicated in the application form and solely at PT-operated gas stations.</p>
+      <p style="margin-bottom:4px;">3.2 PT reserves the right, at any time and at its sole discretion, to request the return of any Card and to issue replacement Cards free of charge.</p>
+      <p style="margin-bottom:4px;">3.3 The Customer shall be solely responsible for the safekeeping, control and proper use of the Card(s) and PIN(s).</p>
+      <p style="margin-bottom:4px;">3.4 Cards are strictly personal and/or vehicle-specific (as applicable) and may not be transferred, shared, lent or used by any unauthorized person.</p>
+      <p style="margin-bottom:10px;">3.5 The Customer shall never disclose the PIN to any third party and shall take all reasonable measures to prevent unauthorized use.</p>
+
+      <p style="font-weight:600;margin-bottom:4px;">4. Charges and Top-Ups</p>
+      <p style="margin-bottom:4px;">4.1 Card issuance fee: USD 5 per Card, unless waived pursuant to Clause 4.2.</p>
+      <p style="margin-bottom:4px;">4.2 Where the initial deposit is USD 100 or more, the Card shall be issued free of charge, with no activation fee.</p>
+      <p style="margin-bottom:4px;">4.3 Minimum top-up amount per transaction: USD 25.</p>
+      <p style="margin-bottom:4px;">4.4 Top-ups may be completed at PT Head Office or via email, subject to PT's internal procedures.</p>
+      <p style="margin-bottom:4px;">4.5 A printed or digital PT invoice shall be issued as confirmation of each top-up.</p>
+      <p style="margin-bottom:10px;">4.6 Card replacement fee (lost, damaged or mutilated Cards): USD 5 per Card.</p>
+
+      <p style="font-weight:600;margin-bottom:4px;">5. Identification and Compliance</p>
+      <p style="margin-bottom:4px;">5.1 The Customer shall provide a valid copy of an official identification document (or, in the case of a corporate Customer, authorized signatory documentation) together with the application form.</p>
+      <p style="margin-bottom:10px;">5.2 PT reserves the right to request additional documentation at any time for verification, compliance or security purposes.</p>
+
+      <p style="font-weight:600;margin-bottom:4px;">6. Lost, Stolen, or Cancelled Cards</p>
+      <p style="margin-bottom:4px;">6.1 In the event that a Card is lost, stolen, mislaid, compromised or damaged, the Customer shall immediately notify PT in writing at cardsupport@petrotrade.ws.</p>
+      <p style="margin-bottom:10px;">6.2 The Customer shall remain fully liable for all transactions carried out on the Card until PT receives such notification and blocks the Card.</p>
+
+      <p style="font-weight:600;margin-bottom:4px;">7. Notifications and Updates</p>
+      <p style="margin-bottom:10px;">The Customer shall notify PT in writing of any change in information, including but not limited to name, address, PIN code, Card restrictions, contact details, authorized users, vehicles, or key personnel.</p>
+
+      <p style="font-weight:600;margin-bottom:6px;">DECLARATION AND ENDORSEMENT</p>
+      <p style="margin-bottom:6px;">By signing the application form, the Customer hereby irrevocably and unconditionally declares, acknowledges, and agrees as follows:</p>
+      <ol style="margin-left:1.25rem;margin-bottom:10px;">
+        <li style="margin-bottom:4px;">All information provided is accurate, complete, and true, and PT is authorized to verify such information by any means it deems appropriate.</li>
+        <li style="margin-bottom:4px;">The Customer requests PT to apply the purchase restrictions (including driver/vehicle restrictions) as specified in the application form.</li>
+        <li style="margin-bottom:4px;">The Customer acknowledges that purchase restrictions are monitored electronically only, and PT shall not be liable for any transactions conducted where electronic systems are inoperable, unavailable, or malfunctioning.</li>
+        <li style="margin-bottom:4px;">The Customer accepts full responsibility for the security and confidentiality of the Card, card number, and PIN. PT shall not be liable for any loss, theft, unauthorized use, or damage arising from the Customer's negligence or breach of these Terms and Conditions.</li>
+        <li style="margin-bottom:4px;">The Customer agrees to use the Card strictly in accordance with the applicable restrictions, limits, and rules and acknowledges that non-compliant transactions may be automatically declined.</li>
+        <li style="margin-bottom:4px;">These Terms and Conditions (together with Schedule A), as amended by PT from time to time, are binding upon the Customer upon signature of the application form.</li>
+        <li style="margin-bottom:4px;">The Customer authorizes PT to collect, process, and store personal and card-related data in accordance with PT's internal policies for card issuance, verification, monitoring, security, and fraud prevention.</li>
+        <li style="margin-bottom:4px;">PT reserves the right, at its sole and exclusive discretion, to suspend or terminate any Card or Customer relationship in the event of fraud, unlawful activity, misuse, or breach of these Terms and Conditions.</li>
+        <li style="margin-bottom:4px;">The Customer expressly acknowledges that PT shall not be responsible for: misuse of the Card or PIN; unauthorized transactions resulting from negligence; any loss arising from sharing the Card, PIN, or account information.</li>
+        <li style="margin-bottom:4px;">To the maximum extent permitted by applicable law, Petro Trade Inc. ("PT") shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation loss of profit, loss of business, loss of data or business interruption, arising out of or in connection with the issuance, use, misuse, suspension or termination of the Card, even if PT has been advised of the possibility of such damages. PT's total aggregate liability shall in no event exceed the total amount of funds available on the Card at the time the event giving rise to the claim occurred.</li>
+        <li style="margin-bottom:4px;">These Terms and Conditions shall be governed by and construed in accordance with the laws of Liberia. Any dispute shall be subject to the exclusive jurisdiction of the courts of Monrovia.</li>
+      </ol>
+    </div>
+
+    <div class="check-group" style="margin-top:14px;">
+      <label class="check-item">
+        <input type="checkbox" id="c_terms">
+        I confirm that all information provided is accurate and I agree to PetroTrade's terms &amp; conditions. <span class="required">*</span>
+      </label>
+    </div>
+  </div>
+
+
+
+  <!-- Section 7 -->
+  <div class="section">
+    <div class="section-title">7. Applicant signature <span class="required">*</span></div>
+    <div class="field-grid" style="margin-bottom:14px;">
+      <div class="field">
+        <label>Full name <span class="required">*</span></label>
+        <input type="text" id="f_sig_name" placeholder="Enter your full name">
+      </div>
+      <div class="field">
+        <label>Date <span class="required">*</span></label>
+        <input type="date" id="f_sig_date">
+      </div>
+    </div>
+    <label style="font-size:12px;color:#555;font-weight:500;display:block;margin-bottom:6px;">Signature <span class="required">*</span></label>
+    <p style="font-size:13px;color:#666;margin-bottom:10px;">Draw your signature below using your mouse or finger (touch screens supported).</p>
+    <div class="sig-outer">
+      <canvas id="sigCanvas" class="sig-canvas" height="170"></canvas>
+    </div>
+    <div class="sig-actions">
+      <button class="sig-btn" onclick="clearSig()">Clear signature</button>
+    </div>
+    <p class="sig-note">By signing above you confirm all information is accurate and you authorise Petro Trade Inc. to process this application.</p>
+
+    <div style="margin-top:20px;">
+      <label style="font-size:12px;color:#555;font-weight:500;display:block;margin-bottom:4px;">ID / Passport document upload <span class="required">*</span></label>
+      <p style="font-size:12px;color:#666;margin-bottom:10px;">Upload a clear copy of your national ID, passport, or other official identification. Accepted formats: JPG, PNG, PDF. Max 10MB.</p>
+      <label id="uploadLabel" for="f_id_upload" style="display:flex;flex-direction:column;align-items:center;justify-content:center;border:1.5px dashed #378ADD;border-radius:10px;background:#f0f7ff;padding:2rem 1rem;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='#e0efff'" onmouseout="this.style.background='#f0f7ff'">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#378ADD" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span style="font-size:14px;font-weight:500;color:#185FA5;">Click to upload ID document</span>
+        <span style="font-size:12px;color:#888;margin-top:4px;">PDF, JPG, PNG — max 10 MB</span>
+        <input type="file" id="f_id_upload" accept="image/*,.pdf" style="display:none;" onchange="handleFileSelect(this)">
+      </label>
+      <div id="uploadStatus" style="display:none;margin-top:10px;padding:10px 14px;border-radius:8px;font-size:13px;background:#EAF3DE;border:1px solid #639922;color:#27500A;"></div>
+    </div>
+  </div>
+
+  <button class="submit-btn" id="downloadBtn" onclick="downloadAsPDF()" style="background:#0C447C;">Download as PDF</button>
+  <button class="submit-btn" onclick="clearAllData()" style="background:#fff;color:#c0392b;border:1.5px solid #c0392b;margin-top:0.75rem;">Clear All Data</button>
+  <div class="toast" id="toast"></div>
+
+
+
+</div>
+
+<button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">&#8679;</button>
+
+<script>
+function togglePortalUsername(){
+  const val = document.getElementById('f_portal_access').value;
+  document.getElementById('portalUsernameRow').style.display = val === 'Yes' ? 'grid' : 'none';
+}
+
+
+function toggleAlertEmail(){
+  const val = document.getElementById('f_email_alerts').value;
+  document.getElementById('alertEmailRow').style.display = val === 'Yes' ? 'grid' : 'none';
+}
+
+function addRow(){
+  const tb = document.getElementById('tableBody');
+  const rowNum = tb.querySelectorAll('tr').length + 1;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">${rowNum}</td>
+    <td><input type="text" placeholder="e.g. LR-1234" oninput="syncRegToLimits(this)"></td>
+    <td><input type="text" placeholder="Name or number"></td>
+    <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">-</option><option>Yes</option><option>No</option></select></td>
+    <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">—</option><option>Diesel</option><option>Gasoline</option></select></td>
+    <td><input type="text" placeholder="e.g. Toyota Hilux"></td>
+    <td><button class="del-btn" onclick="removeRow(this)">×</button></td>`;
+  tb.appendChild(tr);
+}
+
+function removeLimitRow(btn){
+  const rows = document.querySelectorAll('#limitsBody tr');
+  if(rows.length > 1) btn.closest('tr').remove();
+}
+
+function addLimitRow(){
+  const tb = document.getElementById('limitsBody');
+  const rowNum = tb.querySelectorAll('tr').length + 1;
+  const tr = document.createElement('tr');
+  // Get matching vehicle reg if exists
+  const vehicleRows = document.querySelectorAll('#tableBody tr');
+  const matchingReg = vehicleRows[rowNum - 1] ? vehicleRows[rowNum - 1].querySelectorAll('input')[0].value : '';
+  tr.innerHTML = `
+    <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">${rowNum}</td>
+    <td><input type="text" placeholder="Auto-filled" value="${matchingReg}" readonly style="background:#f0f4f8;color:#555;cursor:default;"></td>
+    <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">None</option><option>Amount (US$)</option><option>Quantity (Gallons)</option><option>Transaction (No. of Trx.)</option></select></td>
+    <td><input type="text" placeholder="0.00"></td>
+    <td><input type="text" placeholder="0.00"></td>
+    <td><input type="text" placeholder="0.00"></td>
+    <td><input type="text" placeholder="0.00"></td>
+    <td><button class="del-btn" onclick="removeLimitRow(this)">×</button></td>`;
+  tb.appendChild(tr);
+}
+
+
+
+function syncRegToLimits(input) {
+  // Find the row index of this input in the vehicle table
+  const vehicleRows = document.querySelectorAll('#tableBody tr');
+  let rowIndex = -1;
+  vehicleRows.forEach((row, i) => {
+    if (row.contains(input)) rowIndex = i;
+  });
+  if (rowIndex === -1) return;
+
+  // Find the matching row in the limits table and update its reg input
+  const limitRows = document.querySelectorAll('#limitsBody tr');
+  if (limitRows[rowIndex]) {
+    const limitRegInput = limitRows[rowIndex].querySelectorAll('input')[0];
+    if (limitRegInput) limitRegInput.value = input.value;
+  }
+}
+function syncRowsToCardCount(val) {
+  const count = parseInt(val);
+  if (isNaN(count) || count < 1) return;
+
+  const vehicleBody = document.getElementById('tableBody');
+  const limitsBody = document.getElementById('limitsBody');
+
+  function makeVehicleRow(num) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">${num}</td>
+      <td><input type="text" placeholder="e.g. LR-1234" oninput="syncRegToLimits(this)"></td>
+      <td><input type="text" placeholder="Name or number"></td>
+      <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">-</option><option>Yes</option><option>No</option></select></td>
+      <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">—</option><option>Diesel</option><option>Gasoline</option></select></td>
+      <td><input type="text" placeholder="e.g. Toyota Hilux"></td>
+      <td><button class="del-btn" onclick="removeRow(this)">×</button></td>`;
+    return tr;
+  }
+
+  function makeLimitRow(num) {
+    const tr = document.createElement('tr');
+    // Get matching vehicle reg if exists
+    const vehicleRows = document.querySelectorAll('#tableBody tr');
+    const matchingReg = vehicleRows[num - 1] ? vehicleRows[num - 1].querySelectorAll('input')[0].value : '';
+    tr.innerHTML = `
+      <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">${num}</td>
+      <td><input type="text" placeholder="Auto-filled" value="${matchingReg}" readonly style="background:#f0f4f8;color:#555;cursor:default;"></td>
+      <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">None</option><option>Amount (US$)</option><option>Quantity (Gallons)</option><option>Transaction (No. of Trx.)</option></select></td>
+      <td><input type="text" placeholder="0.00"></td>
+      <td><input type="text" placeholder="0.00"></td>
+      <td><input type="text" placeholder="0.00"></td>
+      <td><input type="text" placeholder="0.00"></td>
+      <td><button class="del-btn" onclick="removeLimitRow(this)">×</button></td>`;
+    return tr;
+  }
+
+  function syncTable(tbody, makeRow) {
+    const current = tbody.querySelectorAll('tr').length;
+    if (count > current) {
+      for (let i = current + 1; i <= count; i++) {
+        tbody.appendChild(makeRow(i));
+      }
+    } else if (count < current) {
+      const rows = tbody.querySelectorAll('tr');
+      for (let i = rows.length - 1; i >= count; i--) {
+        rows[i].remove();
+      }
+    }
+  }
+
+  syncTable(vehicleBody, makeVehicleRow);
+  syncTable(limitsBody, makeLimitRow);
+}
+
+function removeRow(btn){
+  const rows = document.querySelectorAll('#tableBody tr');
+  if(rows.length > 1) btn.closest('tr').remove();
+}
+
+const canvas = document.getElementById('sigCanvas');
+const ctx = canvas.getContext('2d');
+let drawing = false, hasSig = false;
+
+function resizeCanvas(){
+  canvas.width = canvas.offsetWidth;
+  ctx.strokeStyle = '#0C447C';
+  ctx.lineWidth = 2.2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function getPos(e){
+  const r = canvas.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  return { x: (src.clientX - r.left) * (canvas.width / r.width), y: (src.clientY - r.top) * (canvas.height / r.height) };
+}
+canvas.addEventListener('mousedown', e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+canvas.addEventListener('mousemove', e => { if(!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasSig = true; });
+canvas.addEventListener('mouseup', () => drawing = false);
+canvas.addEventListener('mouseleave', () => drawing = false);
+canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, { passive: false });
+canvas.addEventListener('touchmove', e => { e.preventDefault(); if(!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasSig = true; }, { passive: false });
+canvas.addEventListener('touchend', () => drawing = false);
+function clearSig(){ ctx.clearRect(0, 0, canvas.width, canvas.height); hasSig = false; }
+
+let uploadedFile = null;
+function handleFileSelect(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(file.size > 10 * 1024 * 1024){ alert('File is too large. Please upload a file under 10MB.'); input.value = ''; return; }
+  uploadedFile = file;
+  const status = document.getElementById('uploadStatus');
+  status.style.display = 'block';
+  status.textContent = 'File selected: ' + file.name;
+}
+
+function collectFormData(){
+  const vehicleRows = [];
+  document.querySelectorAll('#tableBody tr').forEach((row, i) => {
+    const inputs = row.querySelectorAll('input, select');
+    if(inputs[0] && inputs[0].value.trim()){
+      vehicleRows.push({ num: i+1, reg: inputs[0].value||'-', name: inputs[1].value||'-', restriction: inputs[2].value||'-', fuel: inputs[3].value||'-', vehicle: inputs[4].value||'-' });
+    }
+  });
+  const limitRows = [];
+  document.querySelectorAll('#limitsBody tr').forEach((row, i) => {
+    const inputs = row.querySelectorAll('input, select');
+    // Collect row if ANY field has data
+    const hasData = Array.from(inputs).some(el => el.value && el.value.trim() !== '' && el.value !== '—' && el.value !== '-');
+    if(hasData){
+      limitRows.push({ num: i+1, reg: inputs[0].value||'-', type: inputs[1].value||'-', trx: inputs[2].value||'-', day: inputs[3].value||'-', week: inputs[4].value||'-', month: inputs[5].value||'-' });
+    }
+  });
+  return {
+    name: document.getElementById('f_name').value.trim(),
+    contact: document.getElementById('f_contact').value||'-',
+    dob: document.getElementById('f_dob').value||'-',
+    gender: document.getElementById('f_gender').value||'-',
+    idNum: document.getElementById('f_id').value||'-',
+    nationality: document.getElementById('f_nat').value||'-',
+    phone: document.getElementById('f_phone').value.trim(),
+    phone2: document.getElementById('f_phone2').value||'-',
+    email: document.getElementById('f_email').value.trim(),
+    notes: document.getElementById('f_notes_personal').value||'-',
+    addr: document.getElementById('f_addr').value.trim(),
+    numCards: document.getElementById('f_num_cards').value||'-',
+    portalAccess: document.getElementById('f_portal_access').value||'-',
+    portalUser: document.getElementById('f_portal_username').value||'-',
+    emailAlerts: document.getElementById('f_email_alerts').value||'-',
+    alertEmails: document.getElementById('f_alert_emails').value||'-',
+    color: document.getElementById('f_color').value||'-',
+    number: document.getElementById('f_number').value||'-',
+    extraNotes: document.getElementById('f_notes').value||'-',
+    sigName: document.getElementById('f_sig_name').value||'-',
+    sigDate: document.getElementById('f_sig_date').value||'-',
+    idFileName: uploadedFile ? uploadedFile.name : '-',
+    vehicleRows, limitRows,
+    submittedAt: new Date().toLocaleString()
+  };
+}
+
+function showToast(msg, type){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+}
+
+
+async function downloadAsPDF(){
+  const name = document.getElementById('f_name').value.trim();
+  const email = document.getElementById('f_email').value.trim();
+  const phone = document.getElementById('f_phone').value.trim();
+  const addr = document.getElementById('f_addr').value.trim();
+  const terms = document.getElementById('c_terms').checked;
+  const numCards = document.getElementById('f_num_cards').value.trim();
+  const favColor = document.getElementById('f_color').value;
+  const favNumber = document.getElementById('f_number').value;
+
+  if(!name || !email || !phone || !addr){
+    alert('Please fill in all required fields: entity/individual name, email, phone, and address.');
+    return;
+  }
+  if(!numCards){ alert('Please enter the number of cards requested.'); return; }
+  if(!favColor){ alert('Please select your favorite color (Security Question 1).'); return; }
+  if(!favNumber){ alert('Please select your favorite number (Security Question 2).'); return; }
+  if(!terms){ alert('Please accept the declaration and terms & conditions to proceed.'); return; }
+
+  const sigName = document.getElementById('f_sig_name').value.trim();
+  const sigDate = document.getElementById('f_sig_date').value;
+  if(!sigName){ alert('Please enter your full name in Section 7.'); return; }
+  if(!sigDate){ alert('Please enter the date in Section 7.'); return; }
+  if(!hasSig){ alert('Please provide your signature in Section 7.'); return; }
+  if(!uploadedFile){ alert('Please upload your ID / Passport document in Section 7.'); return; }
+  if(!hasSig){ alert('Please provide your signature before downloading.'); return; }
+
+
+
+  const btn = document.getElementById('downloadBtn');
+  btn.textContent = 'Generating PDF...';
+  btn.disabled = true;
+
+  try {
+    const data = collectFormData();
+
+    // Read ID file as base64
+    const idFileData = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = () => reject(new Error('Failed to read ID file'));
+      reader.readAsDataURL(uploadedFile);
+    });
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const W = 210; const margin = 15; const col = W - margin * 2;
+    let y = 15;
+
+    const addPageIfNeeded = (needed) => { if(y + needed > 278) { doc.addPage(); y = 15; } };
+
+    // Header bar
+    doc.setFillColor(12, 68, 124);
+    doc.rect(0, 0, W, 28, 'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(16); doc.setFont('helvetica','bold');
+    doc.text('Petro Trade Inc.', margin, 12);
+    doc.setFontSize(11); doc.setFont('helvetica','normal');
+    doc.text('Fuel Card Application Form', margin, 21);
+    doc.setFontSize(8);
+    doc.text('Submitted: ' + data.submittedAt, W - margin, 21, { align: 'right' });
+    y = 36;
+
+    const sectionHeader = (title) => {
+      addPageIfNeeded(12);
+      doc.setFillColor(230, 241, 251);
+      doc.rect(margin, y, col, 8, 'F');
+      doc.setTextColor(24, 95, 165);
+      doc.setFontSize(9); doc.setFont('helvetica','bold');
+      doc.text(title.toUpperCase(), margin + 3, y + 5.5);
+      y += 12;
+      doc.setTextColor(26, 26, 26);
+    };
+
+    const fieldPair = (l1, v1, l2, v2) => {
+      addPageIfNeeded(14);
+      const half = col / 2;
+      doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(100,100,100);
+      doc.text(l1, margin, y);
+      doc.text(l2, margin + half, y);
+      doc.setFont('helvetica','normal'); doc.setTextColor(26,26,26); doc.setFontSize(9);
+      const lines1 = doc.splitTextToSize(v1||'-', half - 4);
+      const lines2 = doc.splitTextToSize(v2||'-', half - 4);
+      doc.text(lines1, margin, y + 5);
+      doc.text(lines2, margin + half, y + 5);
+      y += Math.max(lines1.length, lines2.length) * 5 + 7;
+      doc.setDrawColor(220,220,220);
+      doc.line(margin, y - 3, margin + col, y - 3);
+    };
+
+    const fieldFull = (label, value) => {
+      addPageIfNeeded(14);
+      doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(100,100,100);
+      doc.text(label, margin, y);
+      doc.setFont('helvetica','normal'); doc.setTextColor(26,26,26); doc.setFontSize(9);
+      const lines = doc.splitTextToSize(value||'-', col);
+      doc.text(lines, margin, y + 5);
+      y += lines.length * 5 + 7;
+      doc.setDrawColor(220,220,220);
+      doc.line(margin, y - 3, margin + col, y - 3);
+    };
+
+    // Section 1
+    sectionHeader('1. Personal Information');
+    fieldPair('Entity name or individual name', data.name, 'Contact person full name', data.contact);
+    fieldPair('Date of birth', data.dob, 'Gender', data.gender);
+    fieldPair('ID / Passport number', data.idNum, 'Nationality', data.nationality);
+    fieldPair('Phone number', data.phone, 'Phone number 2', data.phone2);
+    fieldPair('Email address', data.email, 'Notes', data.notes);
+    fieldFull('Residential address', data.addr);
+
+    // Section 2
+    sectionHeader('2. Cards Info');
+    fieldFull('Number of cards requested', data.numCards);
+
+    // Vehicle table
+    if(data.vehicleRows.length > 0){
+      addPageIfNeeded(20);
+      doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(80,80,80);
+      doc.text('Vehicle / Asset Details', margin, y); y += 5;
+      const vCols = ['#','Reg No.','Card Name/No.','Fuel Restriction','Fuel Type','Vehicle Model'];
+      const vW = [8, 28, 40, 32, 28, 28];
+      doc.setFillColor(240,244,248);
+      doc.rect(margin, y, col, 7, 'F');
+      doc.setTextColor(85,85,85); doc.setFontSize(7); doc.setFont('helvetica','bold');
+      let cx = margin;
+      vCols.forEach((c,i)=>{ doc.text(c, cx+1, y+5); cx+=vW[i]; });
+      y += 7;
+      data.vehicleRows.forEach((r,idx)=>{
+        addPageIfNeeded(7);
+        if(idx%2===0){ doc.setFillColor(250,251,252); doc.rect(margin, y, col, 6, 'F'); }
+        doc.setTextColor(26,26,26); doc.setFont('helvetica','normal'); doc.setFontSize(8);
+        cx = margin;
+        [String(r.num),r.reg,r.name,r.restriction,r.fuel,r.vehicle].forEach((v,i)=>{ doc.text(String(v).substring(0,20), cx+1, y+4); cx+=vW[i]; });
+        y += 6;
+      });
+      y += 5;
+    }
+
+    // Limits table - always shown
+    addPageIfNeeded(20);
+    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(80,80,80);
+    doc.text('Card Limitations', margin, y); y += 5;
+    const lCols = ['#','Reg No.','Limit Type','Per Trx','Per Day','Per Week','Per Month'];
+    const lW = [8, 25, 38, 22, 22, 22, 22];
+    doc.setFillColor(240,244,248);
+    doc.rect(margin, y, col, 7, 'F');
+    doc.setTextColor(85,85,85); doc.setFontSize(7); doc.setFont('helvetica','bold');
+    let lx = margin;
+    lCols.forEach((c,i)=>{ doc.text(c, lx+1, y+5); lx+=lW[i]; });
+    y += 7;
+    if(data.limitRows.length > 0){
+      data.limitRows.forEach((r,idx)=>{
+        addPageIfNeeded(7);
+        if(idx%2===0){ doc.setFillColor(250,251,252); doc.rect(margin, y, col, 6, 'F'); }
+        doc.setTextColor(26,26,26); doc.setFont('helvetica','normal'); doc.setFontSize(8);
+        lx = margin;
+        [String(r.num),r.reg,r.type,r.trx,r.day,r.week,r.month].forEach((v,i)=>{ doc.text(String(v).substring(0,20), lx+1, y+4); lx+=lW[i]; });
+        y += 6;
+      });
+    } else {
+      doc.setTextColor(150,150,150); doc.setFont('helvetica','italic'); doc.setFontSize(8);
+      doc.text('No limitations specified', margin+2, y+4);
+      y += 6;
+    }
+    y += 5;
+
+    // Section 3
+    sectionHeader('3. PT E-Portal Access and Notifications');
+    fieldPair('PT Card Portal access', data.portalAccess, 'PT Card Portal username', data.portalUser);
+    fieldPair('Transaction email alerts', data.emailAlerts, 'Alert email(s)', data.alertEmails);
+
+    // Section 4
+    sectionHeader('4. Security Questions');
+    fieldPair('Favorite color', data.color, 'Favorite number', data.number);
+
+    // Section 5 - Additional Notes (always on page 2)
+    doc.addPage();
+    y = 15;
+    sectionHeader('5. Additional Notes');
+    fieldFull('Notes', data.extraNotes);
+
+    // Section 6
+    sectionHeader('6. Declaration');
+    fieldFull('Terms & Conditions', 'The applicant has read and accepted the Terms & Conditions of Petro Trade Inc.');
+
+
+
+    // Section 7 - Signature
+    sectionHeader('7. Signature');
+    fieldPair('Full name', data.sigName, 'Date', data.sigDate);
+    addPageIfNeeded(38);
+    doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(100,100,100);
+    doc.text('Signature', margin, y); y += 4;
+    doc.addImage(canvas.toDataURL('image/png'), 'PNG', margin, y, 80, 28);
+    doc.setDrawColor(180,180,180);
+    doc.rect(margin, y, 80, 28);
+    y += 32;
+
+    // Section 8 - ID Document
+    doc.addPage();
+    y = 15;
+    doc.setFillColor(230, 241, 251);
+    doc.rect(margin, y, col, 8, 'F');
+    doc.setTextColor(24, 95, 165);
+    doc.setFontSize(9); doc.setFont('helvetica','bold');
+    doc.text('8. ATTACHED ID / PASSPORT DOCUMENT', margin + 3, y + 5.5);
+    y += 14;
+    doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(100,100,100);
+    doc.text('File name', margin, y);
+    doc.setFont('helvetica','normal'); doc.setTextColor(26,26,26); doc.setFontSize(9);
+    doc.text(data.idFileName, margin, y + 5);
+    y += 14;
+    const idMime = idFileData.split(';')[0].split(':')[1];
+    if(idMime === 'application/pdf'){
+      doc.setFontSize(10); doc.setTextColor(26,26,26);
+      doc.text('PDF document: ' + data.idFileName, margin, y + 10);
+      doc.setFontSize(8); doc.setTextColor(100,100,100);
+      doc.text('(Please refer to the original PDF file to view the ID document)', margin, y + 18);
+    } else {
+      try {
+        const imgFormat = idMime.includes('png') ? 'PNG' : 'JPEG';
+        doc.addImage(idFileData, imgFormat, margin, y, col, 200, undefined, 'FAST');
+        doc.setDrawColor(180,180,180);
+        doc.rect(margin, y, col, 200);
+      } catch(imgErr){
+        doc.setFontSize(9); doc.setTextColor(100,100,100);
+        doc.text('Could not embed image. File: ' + data.idFileName, margin, y + 10);
+      }
+    }
+
+    // Footer on every page
+    const total = doc.internal.getNumberOfPages();
+    for(let p=1;p<=total;p++){
+      doc.setPage(p);
+      doc.setFillColor(12,68,124);
+      doc.rect(0, 287, W, 10, 'F');
+      doc.setFontSize(7); doc.setTextColor(180,210,240);
+      doc.text('Petro Trade Inc. - Fuel Card Application - Confidential', margin, 293);
+      doc.text('MKT/FRM/11.4', W/2, 293, { align:'center' });
+      doc.text('Page '+p+' of '+total, W-margin, 293, { align:'right' });
+    }
+
+    const safeName = data.name.replace(/[^a-zA-Z0-9]/g,'_');
+    doc.save('PetroTrade_FuelCard_' + safeName + '.pdf');
+
+    showToast('PDF downloaded successfully! Please send it to sales@petrotrade.ws', 'success');
+    btn.textContent = 'Download as PDF';
+    btn.disabled = false;
+
+  } catch(err){
+    console.error('PDF error:', err);
+    showToast('Failed to generate PDF: ' + err.message, 'warning');
+    btn.textContent = 'Download as PDF';
+    btn.disabled = false;
+  }
+}
+
+function clearAllData() {
+  if (!confirm('Are you sure you want to clear all entered data? This cannot be undone.')) return;
+
+  // Clear all text inputs, selects, textareas
+  document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], input[type="date"], input[type="number"], textarea').forEach(el => el.value = '');
+  document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+
+  // Reset vehicle table to 1 row
+  const vehicleBody = document.getElementById('tableBody');
+  while (vehicleBody.rows.length > 1) vehicleBody.deleteRow(vehicleBody.rows.length - 1);
+  vehicleBody.querySelectorAll('input').forEach(el => el.value = '');
+  vehicleBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+
+  // Reset limits table to 1 row
+  const limitsBody = document.getElementById('limitsBody');
+  while (limitsBody.rows.length > 1) limitsBody.deleteRow(limitsBody.rows.length - 1);
+  limitsBody.querySelectorAll('input').forEach(el => el.value = '');
+  limitsBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+
+  // Clear signature
+  clearSig();
+
+  // Hide conditional rows
+  document.getElementById('portalUsernameRow').style.display = 'none';
+  document.getElementById('alertEmailRow').style.display = 'none';
+
+  // Clear file upload
+  document.getElementById('f_id_upload').value = '';
+  document.getElementById('uploadStatus').style.display = 'none';
+  uploadedFile = null;
+
+  // Hide toast
+  document.getElementById('toast').className = 'toast';
+}
+
+window.addEventListener('scroll', function() {
+  const btn = document.getElementById('scrollTopBtn');
+  btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
+});
+</script>
+</body>
+</html>
