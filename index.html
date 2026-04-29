@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PetroTrade — Fuel Card Application</title>
@@ -94,132 +94,9 @@
     .section { padding: 1rem 1rem; }
   }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
-function clearAllData() {
-  if (!confirm('Are you sure you want to clear all entered data? This cannot be undone.')) return;
-
-  // Clear all text inputs, selects, textareas
-  document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], input[type="date"], input[type="number"], textarea').forEach(el => el.value = '');
-  document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
-  document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
-
-  // Reset vehicle table to 1 row
-  const vehicleBody = document.getElementById('tableBody');
-  while (vehicleBody.rows.length > 1) vehicleBody.deleteRow(vehicleBody.rows.length - 1);
-  vehicleBody.querySelectorAll('input').forEach(el => el.value = '');
-  vehicleBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
-
-  // Reset limits table to 1 row
-  const limitsBody = document.getElementById('limitsBody');
-  while (limitsBody.rows.length > 1) limitsBody.deleteRow(limitsBody.rows.length - 1);
-  limitsBody.querySelectorAll('input').forEach(el => el.value = '');
-  limitsBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
-
-  // Clear signature
-  clearSig();
-
-  // Hide conditional rows
-  document.getElementById('portalUsernameRow').style.display = 'none';
-  document.getElementById('alertEmailRow').style.display = 'none';
-
-  // Clear file upload
-  document.getElementById('f_id_upload').value = '';
-  document.getElementById('uploadStatus').style.display = 'none';
-  uploadedFile = null;
-
-  // Hide toast
-  document.getElementById('toast').className = 'toast';
-}
-
-window.addEventListener('scroll', function() {
-  const btn = document.getElementById('scrollTopBtn');
-  btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
-});
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
-function clearAllData() {
-  if (!confirm('Are you sure you want to clear all entered data? This cannot be undone.')) return;
-
-  // Clear all text inputs, selects, textareas
-  document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], input[type="date"], input[type="number"], textarea').forEach(el => el.value = '');
-  document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
-  document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
-
-  // Reset vehicle table to 1 row
-  const vehicleBody = document.getElementById('tableBody');
-  while (vehicleBody.rows.length > 1) vehicleBody.deleteRow(vehicleBody.rows.length - 1);
-  vehicleBody.querySelectorAll('input').forEach(el => el.value = '');
-  vehicleBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
-
-  // Reset limits table to 1 row
-  const limitsBody = document.getElementById('limitsBody');
-  while (limitsBody.rows.length > 1) limitsBody.deleteRow(limitsBody.rows.length - 1);
-  limitsBody.querySelectorAll('input').forEach(el => el.value = '');
-  limitsBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
-
-  // Clear signature
-  clearSig();
-
-  // Hide conditional rows
-  document.getElementById('portalUsernameRow').style.display = 'none';
-  document.getElementById('alertEmailRow').style.display = 'none';
-
-  // Clear file upload
-  document.getElementById('f_id_upload').value = '';
-  document.getElementById('uploadStatus').style.display = 'none';
-  uploadedFile = null;
-
-  // Hide toast
-  document.getElementById('toast').className = 'toast';
-}
-
-window.addEventListener('scroll', function() {
-  const btn = document.getElementById('scrollTopBtn');
-  btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
-});
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
-function clearAllData() {
-  if (!confirm('Are you sure you want to clear all entered data? This cannot be undone.')) return;
-
-  // Clear all text inputs, selects, textareas
-  document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], input[type="date"], input[type="number"], textarea').forEach(el => el.value = '');
-  document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
-  document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
-
-  // Reset vehicle table to 1 row
-  const vehicleBody = document.getElementById('tableBody');
-  while (vehicleBody.rows.length > 1) vehicleBody.deleteRow(vehicleBody.rows.length - 1);
-  vehicleBody.querySelectorAll('input').forEach(el => el.value = '');
-  vehicleBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
-
-  // Reset limits table to 1 row
-  const limitsBody = document.getElementById('limitsBody');
-  while (limitsBody.rows.length > 1) limitsBody.deleteRow(limitsBody.rows.length - 1);
-  limitsBody.querySelectorAll('input').forEach(el => el.value = '');
-  limitsBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
-
-  // Clear signature
-  clearSig();
-
-  // Hide conditional rows
-  document.getElementById('portalUsernameRow').style.display = 'none';
-  document.getElementById('alertEmailRow').style.display = 'none';
-
-  // Clear file upload
-  document.getElementById('f_id_upload').value = '';
-  document.getElementById('uploadStatus').style.display = 'none';
-  uploadedFile = null;
-
-  // Hide toast
-  document.getElementById('toast').className = 'toast';
-}
-
-window.addEventListener('scroll', function() {
-  const btn = document.getElementById('scrollTopBtn');
-  btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
-});
-</script>
+<script src="index_files/email.min.js"></script>
+<script src="index_files/jspdf.umd.min.js"></script>
+<script src="index_files/html2canvas.min.js"></script>
 </head>
 <body>
 <div class="page-wrap">
@@ -250,7 +127,7 @@ window.addEventListener('scroll', function() {
       <div class="field">
         <label>Gender</label>
         <select id="f_gender">
-          <option value="">— Select —</option>
+          <option value="" selected="selected">— Select —</option>
           <option>Male</option>
           <option>Female</option>
         </select>
@@ -305,8 +182,8 @@ window.addEventListener('scroll', function() {
         <thead>
           <tr>
             <th style="width:4%">#</th>
-            <th style="width:14%">Registration no.</th>
-            <th style="width:18%">Name or number (printed on card)</th>
+            <th style="width:14%">Registration no. <span style="color:#e24b4a">*</span></th>
+            <th style="width:18%">Name or number (printed on card) <span style="color:#e24b4a">*</span></th>
             <th style="width:16%">Card fuel type restriction</th>
             <th style="width:14%">Fuel type</th>
             <th style="width:16%">Vehicle model (optional)</th>
@@ -318,8 +195,8 @@ window.addEventListener('scroll', function() {
             <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">1</td>
             <td><input type="text" placeholder="e.g. LR-1234" oninput="syncRegToLimits(this)"></td>
             <td><input type="text" placeholder="Name or number"></td>
-            <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">-</option><option>Yes</option><option>No</option></select></td>
-            <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">—</option><option>Diesel</option><option>Gasoline</option></select></td>
+            <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">-</option><option>Yes</option><option>No</option></select></td>
+            <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">—</option><option>Diesel</option><option>Gasoline</option></select></td>
             <td><input type="text" placeholder="e.g. Toyota Hilux"></td>
             <td><button class="del-btn" onclick="removeRow(this)">×</button></td>
           </tr>
@@ -327,7 +204,10 @@ window.addEventListener('scroll', function() {
       </table>
     </div>
     <button class="add-row-btn" onclick="addRow()">+ Add row</button>
-    <p style="margin-top:12px;font-size:13px;color:#c0392b;line-height:1.6;"><strong>Note:</strong><br>Card Fuel Restriction: Cards can only be used for the selected fuel type in the table. (Ex. If Yes is selected and Fuel Type is Gasoline, then the card can only be used for Gasoline)</p>
+    <p style="margin-top:12px;font-size:13px;color:#c0392b;line-height:1.6;"><strong>Note:</strong><br>Card
+ Fuel Restriction: Cards can only be used for the selected fuel type in 
+the table. (Ex. If Yes is selected and Fuel Type is Gasoline, then the 
+card can only be used for Gasoline)</p>
     <p style="font-size:14px;font-weight:600;color:#1a1a1a;margin:18px 0 6px">Card limitations</p>
     <p style="font-size:12px;color:#666;margin-bottom:10px">Limitations can be set as Amount, Quantity, or Transaction limit.</p>
     <div class="table-wrapper">
@@ -345,10 +225,10 @@ window.addEventListener('scroll', function() {
           </tr>
         </thead>
         <tbody id="limitsBody">
-          <tr>
+          <tr data-row-index="0">
             <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">1</td>
-            <td><input type="text" placeholder="Auto-filled" readonly style="background:#f0f4f8;color:#555;cursor:default;"></td>
-            <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">None</option><option>Amount (US$)</option><option>Quantity (Gallons)</option><option>Transaction (No. of Trx.)</option></select></td>
+            <td><input type="text" placeholder="Auto-filled" readonly="readonly" style="background:#f0f4f8;color:#555;cursor:default;"></td>
+            <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">None</option><option>Amount (US$)</option><option>Quantity (Gallons)</option><option>Transaction (No. of Trx.)</option></select></td>
             <td><input type="text" placeholder="0.00"></td>
             <td><input type="text" placeholder="0.00"></td>
             <td><input type="text" placeholder="0.00"></td>
@@ -369,7 +249,7 @@ window.addEventListener('scroll', function() {
       <div class="field">
         <label>PT Card Portal access</label>
         <select id="f_portal_access" onchange="togglePortalUsername()">
-          <option value="">— Select —</option>
+          <option value="" selected="selected">— Select —</option>
           <option>Yes</option>
           <option>No</option>
         </select>
@@ -387,7 +267,7 @@ window.addEventListener('scroll', function() {
       <div class="field">
         <label>Transaction email alerts</label>
         <select id="f_email_alerts" onchange="toggleAlertEmail()">
-          <option value="">— Select —</option>
+          <option value="" selected="selected">— Select —</option>
           <option>Yes</option>
           <option>No</option>
         </select>
@@ -413,7 +293,7 @@ window.addEventListener('scroll', function() {
       <div class="field">
         <label>What is your favorite color? <span class="required">*</span></label>
         <select id="f_color">
-          <option value="">— Select —</option>
+          <option value="" selected="selected">— Select —</option>
           <option>Red</option>
           <option>Blue</option>
           <option>Green</option>
@@ -429,7 +309,7 @@ window.addEventListener('scroll', function() {
       <div class="field">
         <label>What is your favorite number? <span class="required">*</span></label>
         <select id="f_number">
-          <option value="">— Select —</option>
+          <option value="" selected="selected">— Select —</option>
           <option>10</option><option>11</option><option>12</option><option>13</option><option>14</option>
           <option>15</option><option>16</option><option>17</option><option>18</option><option>19</option>
           <option>20</option><option>21</option><option>22</option><option>23</option><option>24</option>
@@ -480,15 +360,26 @@ window.addEventListener('scroll', function() {
       </ul>
 
       <p style="font-weight:600;margin-bottom:4px;">2. Supply of Cards</p>
-      <p style="margin-bottom:4px;">2.1 Each Card shall be issued together with a corresponding PIN, which shall be delivered to the Customer under a separate sealed envelope or secure electronic means.</p>
+      <p style="margin-bottom:4px;">2.1 Each Card shall be issued 
+together with a corresponding PIN, which shall be delivered to the 
+Customer under a separate sealed envelope or secure electronic means.</p>
       <p style="margin-bottom:10px;">2.2 Ownership of the Card remains with PT at all times.</p>
 
       <p style="font-weight:600;margin-bottom:4px;">3. Use of the Card</p>
-      <p style="margin-bottom:4px;">3.1 Cards authorize the Customer to purchase fuel and/or related products strictly in accordance with the limits, restrictions and specifications indicated in the application form and solely at PT-operated gas stations.</p>
-      <p style="margin-bottom:4px;">3.2 PT reserves the right, at any time and at its sole discretion, to request the return of any Card and to issue replacement Cards free of charge.</p>
+      <p style="margin-bottom:4px;">3.1 Cards authorize the Customer to 
+purchase fuel and/or related products strictly in accordance with the 
+limits, restrictions and specifications indicated in the application 
+form and solely at PT-operated gas stations.</p>
+      <p style="margin-bottom:4px;">3.2 PT reserves the right, at any 
+time and at its sole discretion, to request the return of any Card and 
+to issue replacement Cards free of charge.</p>
       <p style="margin-bottom:4px;">3.3 The Customer shall be solely responsible for the safekeeping, control and proper use of the Card(s) and PIN(s).</p>
-      <p style="margin-bottom:4px;">3.4 Cards are strictly personal and/or vehicle-specific (as applicable) and may not be transferred, shared, lent or used by any unauthorized person.</p>
-      <p style="margin-bottom:10px;">3.5 The Customer shall never disclose the PIN to any third party and shall take all reasonable measures to prevent unauthorized use.</p>
+      <p style="margin-bottom:4px;">3.4 Cards are strictly personal 
+and/or vehicle-specific (as applicable) and may not be transferred, 
+shared, lent or used by any unauthorized person.</p>
+      <p style="margin-bottom:10px;">3.5 The Customer shall never 
+disclose the PIN to any third party and shall take all reasonable 
+measures to prevent unauthorized use.</p>
 
       <p style="font-weight:600;margin-bottom:4px;">4. Charges and Top-Ups</p>
       <p style="margin-bottom:4px;">4.1 Card issuance fee: USD 5 per Card, unless waived pursuant to Clause 4.2.</p>
@@ -499,30 +390,79 @@ window.addEventListener('scroll', function() {
       <p style="margin-bottom:10px;">4.6 Card replacement fee (lost, damaged or mutilated Cards): USD 5 per Card.</p>
 
       <p style="font-weight:600;margin-bottom:4px;">5. Identification and Compliance</p>
-      <p style="margin-bottom:4px;">5.1 The Customer shall provide a valid copy of an official identification document (or, in the case of a corporate Customer, authorized signatory documentation) together with the application form.</p>
+      <p style="margin-bottom:4px;">5.1 The Customer shall provide a 
+valid copy of an official identification document (or, in the case of a 
+corporate Customer, authorized signatory documentation) together with 
+the application form.</p>
       <p style="margin-bottom:10px;">5.2 PT reserves the right to request additional documentation at any time for verification, compliance or security purposes.</p>
 
       <p style="font-weight:600;margin-bottom:4px;">6. Lost, Stolen, or Cancelled Cards</p>
-      <p style="margin-bottom:4px;">6.1 In the event that a Card is lost, stolen, mislaid, compromised or damaged, the Customer shall immediately notify PT in writing at cardsupport@petrotrade.ws.</p>
-      <p style="margin-bottom:10px;">6.2 The Customer shall remain fully liable for all transactions carried out on the Card until PT receives such notification and blocks the Card.</p>
+      <p style="margin-bottom:4px;">6.1 In the event that a Card is 
+lost, stolen, mislaid, compromised or damaged, the Customer shall 
+immediately notify PT in writing at cardsupport@petrotrade.ws.</p>
+      <p style="margin-bottom:10px;">6.2 The Customer shall remain fully
+ liable for all transactions carried out on the Card until PT receives 
+such notification and blocks the Card.</p>
 
       <p style="font-weight:600;margin-bottom:4px;">7. Notifications and Updates</p>
-      <p style="margin-bottom:10px;">The Customer shall notify PT in writing of any change in information, including but not limited to name, address, PIN code, Card restrictions, contact details, authorized users, vehicles, or key personnel.</p>
+      <p style="margin-bottom:10px;">The Customer shall notify PT in 
+writing of any change in information, including but not limited to name,
+ address, PIN code, Card restrictions, contact details, authorized 
+users, vehicles, or key personnel.</p>
 
       <p style="font-weight:600;margin-bottom:6px;">DECLARATION AND ENDORSEMENT</p>
-      <p style="margin-bottom:6px;">By signing the application form, the Customer hereby irrevocably and unconditionally declares, acknowledges, and agrees as follows:</p>
+      <p style="margin-bottom:6px;">By signing the application form, the
+ Customer hereby irrevocably and unconditionally declares, acknowledges,
+ and agrees as follows:</p>
       <ol style="margin-left:1.25rem;margin-bottom:10px;">
-        <li style="margin-bottom:4px;">All information provided is accurate, complete, and true, and PT is authorized to verify such information by any means it deems appropriate.</li>
-        <li style="margin-bottom:4px;">The Customer requests PT to apply the purchase restrictions (including driver/vehicle restrictions) as specified in the application form.</li>
-        <li style="margin-bottom:4px;">The Customer acknowledges that purchase restrictions are monitored electronically only, and PT shall not be liable for any transactions conducted where electronic systems are inoperable, unavailable, or malfunctioning.</li>
-        <li style="margin-bottom:4px;">The Customer accepts full responsibility for the security and confidentiality of the Card, card number, and PIN. PT shall not be liable for any loss, theft, unauthorized use, or damage arising from the Customer's negligence or breach of these Terms and Conditions.</li>
-        <li style="margin-bottom:4px;">The Customer agrees to use the Card strictly in accordance with the applicable restrictions, limits, and rules and acknowledges that non-compliant transactions may be automatically declined.</li>
-        <li style="margin-bottom:4px;">These Terms and Conditions (together with Schedule A), as amended by PT from time to time, are binding upon the Customer upon signature of the application form.</li>
-        <li style="margin-bottom:4px;">The Customer authorizes PT to collect, process, and store personal and card-related data in accordance with PT's internal policies for card issuance, verification, monitoring, security, and fraud prevention.</li>
-        <li style="margin-bottom:4px;">PT reserves the right, at its sole and exclusive discretion, to suspend or terminate any Card or Customer relationship in the event of fraud, unlawful activity, misuse, or breach of these Terms and Conditions.</li>
-        <li style="margin-bottom:4px;">The Customer expressly acknowledges that PT shall not be responsible for: misuse of the Card or PIN; unauthorized transactions resulting from negligence; any loss arising from sharing the Card, PIN, or account information.</li>
-        <li style="margin-bottom:4px;">To the maximum extent permitted by applicable law, Petro Trade Inc. ("PT") shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation loss of profit, loss of business, loss of data or business interruption, arising out of or in connection with the issuance, use, misuse, suspension or termination of the Card, even if PT has been advised of the possibility of such damages. PT's total aggregate liability shall in no event exceed the total amount of funds available on the Card at the time the event giving rise to the claim occurred.</li>
-        <li style="margin-bottom:4px;">These Terms and Conditions shall be governed by and construed in accordance with the laws of Liberia. Any dispute shall be subject to the exclusive jurisdiction of the courts of Monrovia.</li>
+        <li style="margin-bottom:4px;">All information provided is 
+accurate, complete, and true, and PT is authorized to verify such 
+information by any means it deems appropriate.</li>
+        <li style="margin-bottom:4px;">The Customer requests PT to apply
+ the purchase restrictions (including driver/vehicle restrictions) as 
+specified in the application form.</li>
+        <li style="margin-bottom:4px;">The Customer acknowledges that 
+purchase restrictions are monitored electronically only, and PT shall 
+not be liable for any transactions conducted where electronic systems 
+are inoperable, unavailable, or malfunctioning.</li>
+        <li style="margin-bottom:4px;">The Customer accepts full 
+responsibility for the security and confidentiality of the Card, card 
+number, and PIN. PT shall not be liable for any loss, theft, 
+unauthorized use, or damage arising from the Customer's negligence or 
+breach of these Terms and Conditions.</li>
+        <li style="margin-bottom:4px;">The Customer agrees to use the 
+Card strictly in accordance with the applicable restrictions, limits, 
+and rules and acknowledges that non-compliant transactions may be 
+automatically declined.</li>
+        <li style="margin-bottom:4px;">These Terms and Conditions 
+(together with Schedule A), as amended by PT from time to time, are 
+binding upon the Customer upon signature of the application form.</li>
+        <li style="margin-bottom:4px;">The Customer authorizes PT to 
+collect, process, and store personal and card-related data in accordance
+ with PT's internal policies for card issuance, verification, 
+monitoring, security, and fraud prevention.</li>
+        <li style="margin-bottom:4px;">PT reserves the right, at its 
+sole and exclusive discretion, to suspend or terminate any Card or 
+Customer relationship in the event of fraud, unlawful activity, misuse, 
+or breach of these Terms and Conditions.</li>
+        <li style="margin-bottom:4px;">The Customer expressly 
+acknowledges that PT shall not be responsible for: misuse of the Card or
+ PIN; unauthorized transactions resulting from negligence; any loss 
+arising from sharing the Card, PIN, or account information.</li>
+        <li style="margin-bottom:4px;">To the maximum extent permitted 
+by applicable law, Petro Trade Inc. ("PT") shall not be liable for any 
+indirect, incidental, special, consequential, or punitive damages, 
+including without limitation loss of profit, loss of business, loss of 
+data or business interruption, arising out of or in connection with the 
+issuance, use, misuse, suspension or termination of the Card, even if PT
+ has been advised of the possibility of such damages. PT's total 
+aggregate liability shall in no event exceed the total amount of funds 
+available on the Card at the time the event giving rise to the claim 
+occurred.</li>
+        <li style="margin-bottom:4px;">These Terms and Conditions shall 
+be governed by and construed in accordance with the laws of Liberia. Any
+ dispute shall be subject to the exclusive jurisdiction of the courts of
+ Monrovia.</li>
       </ol>
     </div>
 
@@ -552,7 +492,7 @@ window.addEventListener('scroll', function() {
     <label style="font-size:12px;color:#555;font-weight:500;display:block;margin-bottom:6px;">Signature <span class="required">*</span></label>
     <p style="font-size:13px;color:#666;margin-bottom:10px;">Draw your signature below using your mouse or finger (touch screens supported).</p>
     <div class="sig-outer">
-      <canvas id="sigCanvas" class="sig-canvas" height="170"></canvas>
+      <canvas id="sigCanvas" class="sig-canvas" height="170" width="680"></canvas>
     </div>
     <div class="sig-actions">
       <button class="sig-btn" onclick="clearSig()">Clear signature</button>
@@ -563,7 +503,7 @@ window.addEventListener('scroll', function() {
       <label style="font-size:12px;color:#555;font-weight:500;display:block;margin-bottom:4px;">ID / Passport document upload <span class="required">*</span></label>
       <p style="font-size:12px;color:#666;margin-bottom:10px;">Upload a clear copy of your national ID, passport, or other official identification. Accepted formats: JPG, PNG, PDF. Max 10MB.</p>
       <label id="uploadLabel" for="f_id_upload" style="display:flex;flex-direction:column;align-items:center;justify-content:center;border:1.5px dashed #378ADD;border-radius:10px;background:#f0f7ff;padding:2rem 1rem;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='#e0efff'" onmouseout="this.style.background='#f0f7ff'">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#378ADD" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#378ADD" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
         <span style="font-size:14px;font-weight:500;color:#185FA5;">Click to upload ID document</span>
         <span style="font-size:12px;color:#888;margin-top:4px;">PDF, JPG, PNG — max 10 MB</span>
         <input type="file" id="f_id_upload" accept="image/*,.pdf" style="display:none;" onchange="handleFileSelect(this)">
@@ -580,7 +520,7 @@ window.addEventListener('scroll', function() {
 
 </div>
 
-<button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">&#8679;</button>
+<button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">⇧</button>
 
 <script>
 function togglePortalUsername(){
@@ -617,10 +557,12 @@ function removeLimitRow(btn){
 function addLimitRow(){
   const tb = document.getElementById('limitsBody');
   const rowNum = tb.querySelectorAll('tr').length + 1;
+  const rowIndex = rowNum - 1;
   const tr = document.createElement('tr');
+  tr.setAttribute('data-row-index', rowIndex);
   // Get matching vehicle reg if exists
   const vehicleRows = document.querySelectorAll('#tableBody tr');
-  const matchingReg = vehicleRows[rowNum - 1] ? vehicleRows[rowNum - 1].querySelectorAll('input')[0].value : '';
+  const matchingReg = vehicleRows[rowIndex] ? vehicleRows[rowIndex].querySelectorAll('input')[0].value : '';
   tr.innerHTML = `
     <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">${rowNum}</td>
     <td><input type="text" placeholder="Auto-filled" value="${matchingReg}" readonly style="background:#f0f4f8;color:#555;cursor:default;"></td>
@@ -644,10 +586,10 @@ function syncRegToLimits(input) {
   });
   if (rowIndex === -1) return;
 
-  // Find the matching row in the limits table and update its reg input
-  const limitRows = document.querySelectorAll('#limitsBody tr');
-  if (limitRows[rowIndex]) {
-    const limitRegInput = limitRows[rowIndex].querySelectorAll('input')[0];
+  // Find the matching row in the limits table by data-row-index attribute
+  const limitRow = document.querySelector('#limitsBody tr[data-row-index="' + rowIndex + '"]');
+  if (limitRow) {
+    const limitRegInput = limitRow.querySelectorAll('input')[0];
     if (limitRegInput) limitRegInput.value = input.value;
   }
 }
@@ -673,9 +615,11 @@ function syncRowsToCardCount(val) {
 
   function makeLimitRow(num) {
     const tr = document.createElement('tr');
+    const rowIndex = num - 1;
+    tr.setAttribute('data-row-index', rowIndex);
     // Get matching vehicle reg if exists
     const vehicleRows = document.querySelectorAll('#tableBody tr');
-    const matchingReg = vehicleRows[num - 1] ? vehicleRows[num - 1].querySelectorAll('input')[0].value : '';
+    const matchingReg = vehicleRows[rowIndex] ? vehicleRows[rowIndex].querySelectorAll('input')[0].value : '';
     tr.innerHTML = `
       <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">${num}</td>
       <td><input type="text" placeholder="Auto-filled" value="${matchingReg}" readonly style="background:#f0f4f8;color:#555;cursor:default;"></td>
@@ -817,6 +761,14 @@ async function downloadAsPDF(){
     return;
   }
   if(!numCards){ alert('Please enter the number of cards requested.'); return; }
+
+  // Validate required fields in vehicle table rows
+  const vehicleTableRows = document.querySelectorAll('#tableBody tr');
+  for(let i = 0; i < vehicleTableRows.length; i++){
+    const inputs = vehicleTableRows[i].querySelectorAll('input, select');
+    if(!inputs[0].value.trim()){ alert('Row ' + (i+1) + ' in the vehicle table is missing a Registration No. (required).'); return; }
+    if(!inputs[1].value.trim()){ alert('Row ' + (i+1) + ' in the vehicle table is missing a Name or Number (printed on card) (required).'); return; }
+  }
   if(!favColor){ alert('Please select your favorite color (Security Question 1).'); return; }
   if(!favNumber){ alert('Please select your favorite number (Security Question 2).'); return; }
   if(!terms){ alert('Please accept the declaration and terms & conditions to proceed.'); return; }
@@ -827,7 +779,6 @@ async function downloadAsPDF(){
   if(!sigDate){ alert('Please enter the date in Section 7.'); return; }
   if(!hasSig){ alert('Please provide your signature in Section 7.'); return; }
   if(!uploadedFile){ alert('Please upload your ID / Passport document in Section 7.'); return; }
-  if(!hasSig){ alert('Please provide your signature before downloading.'); return; }
 
 
 
@@ -1101,5 +1052,5 @@ window.addEventListener('scroll', function() {
   btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
 });
 </script>
-</body>
-</html>
+
+</body></html>
