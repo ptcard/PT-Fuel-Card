@@ -498,12 +498,14 @@ be governed by and construed in accordance with the laws of Liberia. Any
 
     <div style="margin-top:20px;">
       <label style="font-size:12px;color:#555;font-weight:500;display:block;margin-bottom:4px;">ID / Passport document upload <span class="required">*</span></label>
-      <p style="font-size:12px;color:#666;margin-bottom:10px;">Upload a clear copy of your national ID, passport, or other official identification. Accepted formats: JPG, PNG, PDF. Max 10MB.</p>
+      <p style="font-size:12px;color:#666;margin-bottom:10px;">Upload a 
+clear copy of your national ID, passport, or other official 
+identification. Accepted formats: JPG, PNG, HEIC, PDF. Max 10MB.</p>
       <label id="uploadLabel" for="f_id_upload" style="display:flex;flex-direction:column;align-items:center;justify-content:center;border:1.5px dashed #378ADD;border-radius:10px;background:#f0f7ff;padding:2rem 1rem;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='#e0efff'" onmouseout="this.style.background='#f0f7ff'">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#378ADD" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
         <span style="font-size:14px;font-weight:500;color:#185FA5;">Click to upload ID document</span>
-        <span style="font-size:12px;color:#888;margin-top:4px;">PDF, JPG, PNG — max 10 MB</span>
-        <input type="file" id="f_id_upload" accept="image/*,.pdf" style="display:none;" onchange="handleFileSelect(this)">
+        <span style="font-size:12px;color:#888;margin-top:4px;">PDF, JPG, PNG, HEIC — max 10 MB</span>
+        <input type="file" id="f_id_upload" accept="image/*,.pdf,.heic,.heif" style="display:none;" onchange="handleFileSelect(this)">
       </label>
       <div id="uploadStatus" style="display:none;margin-top:10px;padding:10px 14px;border-radius:8px;font-size:13px;background:#EAF3DE;border:1px solid #639922;color:#27500A;"></div>
     </div>
@@ -837,14 +839,17 @@ async function downloadAsPDF(){
       addPageIfNeeded(14);
       const half = col / 2;
       doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(100,100,100);
-      doc.text(l1, margin, y);
-      doc.text(l2, margin + half, y);
+      const label1Lines = doc.splitTextToSize(l1, half - 4);
+      const label2Lines = doc.splitTextToSize(l2, half - 4);
+      doc.text(label1Lines, margin, y);
+      doc.text(label2Lines, margin + half, y);
+      const labelHeight = Math.max(label1Lines.length, label2Lines.length) * 4;
       doc.setFont('helvetica','normal'); doc.setTextColor(26,26,26); doc.setFontSize(9);
-      const lines1 = doc.splitTextToSize(v1||'-', half - 4);
-      const lines2 = doc.splitTextToSize(v2||'-', half - 4);
-      doc.text(lines1, margin, y + 5);
-      doc.text(lines2, margin + half, y + 5);
-      y += Math.max(lines1.length, lines2.length) * 5 + 7;
+      const lines1 = doc.splitTextToSize(String(v1||'-'), half - 4);
+      const lines2 = doc.splitTextToSize(String(v2||'-'), half - 4);
+      doc.text(lines1, margin, y + labelHeight + 2);
+      doc.text(lines2, margin + half, y + labelHeight + 2);
+      y += labelHeight + Math.max(lines1.length, lines2.length) * 5 + 5;
       doc.setDrawColor(220,220,220);
       doc.line(margin, y - 3, margin + col, y - 3);
     };
@@ -852,11 +857,13 @@ async function downloadAsPDF(){
     const fieldFull = (label, value) => {
       addPageIfNeeded(14);
       doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(100,100,100);
-      doc.text(label, margin, y);
+      const labelLines = doc.splitTextToSize(label, col);
+      doc.text(labelLines, margin, y);
+      const labelHeight = labelLines.length * 4;
       doc.setFont('helvetica','normal'); doc.setTextColor(26,26,26); doc.setFontSize(9);
-      const lines = doc.splitTextToSize(value||'-', col);
-      doc.text(lines, margin, y + 5);
-      y += lines.length * 5 + 7;
+      const lines = doc.splitTextToSize(String(value||'-'), col);
+      doc.text(lines, margin, y + labelHeight + 2);
+      y += labelHeight + lines.length * 5 + 5;
       doc.setDrawColor(220,220,220);
       doc.line(margin, y - 3, margin + col, y - 3);
     };
@@ -880,7 +887,7 @@ async function downloadAsPDF(){
       doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(80,80,80);
       doc.text('Vehicle / Asset Details', margin, y); y += 5;
       const vCols = ['#','Reg No.','Card Name/No.','Fuel Restriction','Fuel Type','Vehicle Model'];
-      const vW = [8, 28, 40, 32, 28, 28];
+      const vW = [8, 28, 52, 26, 24, 26];
       doc.setFillColor(240,244,248);
       doc.rect(margin, y, col, 7, 'F');
       doc.setTextColor(85,85,85); doc.setFontSize(7); doc.setFont('helvetica','bold');
@@ -888,12 +895,18 @@ async function downloadAsPDF(){
       vCols.forEach((c,i)=>{ doc.text(c, cx+1, y+5); cx+=vW[i]; });
       y += 7;
       data.vehicleRows.forEach((r,idx)=>{
-        addPageIfNeeded(7);
-        if(idx%2===0){ doc.setFillColor(250,251,252); doc.rect(margin, y, col, 6, 'F'); }
+        const cellValues = [String(r.num), r.reg, r.name, r.restriction, r.fuel, r.vehicle];
+        const wrappedCells = cellValues.map((v,i) => doc.splitTextToSize(String(v||'-'), vW[i] - 2));
+        const rowH = Math.max(6, Math.max(...wrappedCells.map(w => w.length)) * 5 + 2);
+        addPageIfNeeded(rowH);
+        if(idx%2===0){ doc.setFillColor(250,251,252); doc.rect(margin, y, col, rowH, 'F'); }
         doc.setTextColor(26,26,26); doc.setFont('helvetica','normal'); doc.setFontSize(8);
         cx = margin;
-        [String(r.num),r.reg,r.name,r.restriction,r.fuel,r.vehicle].forEach((v,i)=>{ doc.text(String(v).substring(0,20), cx+1, y+4); cx+=vW[i]; });
-        y += 6;
+        wrappedCells.forEach((lines, i) => {
+          doc.text(lines, cx+1, y+4);
+          cx += vW[i];
+        });
+        y += rowH;
       });
       y += 5;
     }
@@ -912,12 +925,18 @@ async function downloadAsPDF(){
     y += 7;
     if(data.limitRows.length > 0){
       data.limitRows.forEach((r,idx)=>{
-        addPageIfNeeded(7);
-        if(idx%2===0){ doc.setFillColor(250,251,252); doc.rect(margin, y, col, 6, 'F'); }
+        const cellValues = [String(r.num),r.reg,r.type,r.trx,r.day,r.week,r.month];
+        const wrappedCells = cellValues.map((v,i) => doc.splitTextToSize(String(v||'-'), lW[i] - 2));
+        const rowH = Math.max(6, Math.max(...wrappedCells.map(w => w.length)) * 5 + 2);
+        addPageIfNeeded(rowH);
+        if(idx%2===0){ doc.setFillColor(250,251,252); doc.rect(margin, y, col, rowH, 'F'); }
         doc.setTextColor(26,26,26); doc.setFont('helvetica','normal'); doc.setFontSize(8);
         lx = margin;
-        [String(r.num),r.reg,r.type,r.trx,r.day,r.week,r.month].forEach((v,i)=>{ doc.text(String(v).substring(0,20), lx+1, y+4); lx+=lW[i]; });
-        y += 6;
+        wrappedCells.forEach((lines, i) => {
+          doc.text(lines, lx+1, y+4);
+          lx += lW[i];
+        });
+        y += rowH;
       });
     } else {
       doc.setTextColor(150,150,150); doc.setFont('helvetica','italic'); doc.setFontSize(8);
@@ -970,14 +989,15 @@ async function downloadAsPDF(){
     doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(100,100,100);
     doc.text('File name', margin, y);
     doc.setFont('helvetica','normal'); doc.setTextColor(26,26,26); doc.setFontSize(9);
-    doc.text(data.idFileName, margin, y + 5);
-    y += 14;
+    const fileNameLines = doc.splitTextToSize(data.idFileName, col);
+    doc.text(fileNameLines, margin, y + 5);
+    y += fileNameLines.length * 5 + 9;
     const idMime = idFileData.split(';')[0].split(':')[1];
-    if(idMime === 'application/pdf'){
+    if(idMime === 'application/pdf' || idMime === 'image/heic' || idMime === 'image/heif'){
       doc.setFontSize(10); doc.setTextColor(26,26,26);
-      doc.text('PDF document: ' + data.idFileName, margin, y + 10);
+      doc.text('Attached file: ' + data.idFileName, margin, y + 10);
       doc.setFontSize(8); doc.setTextColor(100,100,100);
-      doc.text('(Please refer to the original PDF file to view the ID document)', margin, y + 18);
+      doc.text('(Please refer to the original file to view the ID document)', margin, y + 18);
     } else {
       try {
         const imgFormat = idMime.includes('png') ? 'PNG' : 'JPEG';
@@ -1059,7 +1079,7 @@ window.addEventListener('scroll', function() {
 });
 </script>
 
-<script src="index1_files/email.min.js"></script>
+<script src="index2_files/email.min.js"></script>
 <script>
 // Dynamically load jsPDF from multiple CDNs with fallback
 function loadScript(src) {
