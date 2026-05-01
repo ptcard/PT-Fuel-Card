@@ -105,6 +105,21 @@
     </div>
   </div>
 
+  <!-- Applicant Type -->
+  <div class="section" style="padding:18px 24px;">
+    <div class="section-title">Applicant Type <span class="required">*</span></div>
+    <div style="display:flex;gap:32px;margin-top:10px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:15px;font-weight:600;color:#1a1a1a;">
+        <input type="radio" name="applicantType" id="type_corporate" value="Corporate" style="accent-color:#0C447C;width:18px;height:18px;cursor:pointer;">
+        Corporate
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:15px;font-weight:600;color:#1a1a1a;">
+        <input type="radio" name="applicantType" id="type_individual" value="Individual" style="accent-color:#0C447C;width:18px;height:18px;cursor:pointer;">
+        Individual
+      </label>
+    </div>
+  </div>
+
   <!-- Personal Information -->
   <div class="section">
     <div class="section-title">1. Personal information</div>
@@ -710,7 +725,9 @@ function collectFormData(){
       limitRows.push({ num: i+1, reg: inputs[0].value||'-', type: inputs[1].value||'-', trx: inputs[2].value||'-', day: inputs[3].value||'-', week: inputs[4].value||'-', month: inputs[5].value||'-' });
     }
   });
+  const applicantTypeRadio = document.querySelector('input[name="applicantType"]:checked');
   return {
+    applicantType: applicantTypeRadio ? applicantTypeRadio.value : '-',
     name: document.getElementById('f_name').value.trim(),
     contact: document.getElementById('f_contact').value||'-',
     dob: document.getElementById('f_dob').value||'-',
@@ -746,6 +763,9 @@ function showToast(msg, type){
 
 
 async function downloadAsPDF(){
+  const applicantTypeEl = document.querySelector('input[name="applicantType"]:checked');
+  if(!applicantTypeEl){ alert('Please select an Applicant Type: Corporate or Individual.'); return; }
+
   const name = document.getElementById('f_name').value.trim();
   const email = document.getElementById('f_email').value.trim();
   const phone = document.getElementById('f_phone').value.trim();
@@ -794,8 +814,6 @@ async function downloadAsPDF(){
       return;
     }
 
-    const data = collectFormData();
-
     // Read ID file as base64
     const idFileData = await new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -803,6 +821,8 @@ async function downloadAsPDF(){
       reader.onerror = () => reject(new Error('Failed to read ID file'));
       reader.readAsDataURL(uploadedFile);
     });
+
+    const data = collectFormData();
 
     const jsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
     if (!jsPDF) throw new Error('jsPDF library failed to load. Please check your internet connection.');
@@ -867,6 +887,9 @@ async function downloadAsPDF(){
       doc.setDrawColor(220,220,220);
       doc.line(margin, y - 3, margin + col, y - 3);
     };
+
+    // Applicant Type
+    fieldFull('Applicant Type', data.applicantType);
 
     // Section 1
     sectionHeader('1. Personal Information');
@@ -1043,6 +1066,7 @@ function clearAllData() {
   // Clear all text inputs, selects, textareas
   document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], input[type="date"], input[type="number"], textarea').forEach(el => el.value = '');
   document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  document.querySelectorAll('input[type="radio"]').forEach(el => el.checked = false);
   document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
 
   // Reset vehicle table to 1 row
@@ -1079,7 +1103,7 @@ window.addEventListener('scroll', function() {
 });
 </script>
 
-<script src="index2_files/email.min.js"></script>
+<script src="index3_files/email.min.js"></script>
 <script>
 // Dynamically load jsPDF from multiple CDNs with fallback
 function loadScript(src) {
