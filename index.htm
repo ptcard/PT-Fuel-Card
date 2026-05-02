@@ -289,7 +289,7 @@ card can only be used for Gasoline)</p>
 
     <div class="field-grid" id="portalUsernameRow" style="margin-bottom:14px;display:none">
       <div class="field">
-        <label>PT Card Portal username</label>
+        <label>PT Card Portal username <span class="required">*</span></label>
         <input type="text" id="f_portal_username" placeholder="Enter desired username">
       </div>
     </div>
@@ -307,7 +307,7 @@ card can only be used for Gasoline)</p>
 
     <div class="field-grid" id="alertEmailRow" style="display:none">
       <div class="field full">
-        <label>Email address(es) for alerts</label>
+        <label>Email address(es) for alerts <span class="required">*</span></label>
         <input type="text" id="f_alert_emails" placeholder="e.g. alerts@company.com, manager@company.com">
         <span class="hint">Separate multiple email addresses with a comma</span>
       </div>
@@ -814,6 +814,25 @@ async function downloadAsPDF(){
   }
   if(!favColor){ alert('Please select your favorite color (Security Question 1).'); return; }
   if(!favNumber){ alert('Please select your favorite number (Security Question 2).'); return; }
+
+  // If PT Card Portal access is Yes, username is required
+  const portalAccessVal = document.getElementById('f_portal_access').value;
+  const portalUsernameVal = document.getElementById('f_portal_username').value.trim();
+  if(portalAccessVal === 'Yes' && !portalUsernameVal){
+    alert('Please enter a PT Card Portal username (required when Portal access is set to Yes).');
+    document.getElementById('f_portal_username').focus();
+    return;
+  }
+
+  // If Transaction email alerts is Yes, alert email(s) are required
+  const emailAlertsVal = document.getElementById('f_email_alerts').value;
+  const alertEmailsVal = document.getElementById('f_alert_emails').value.trim();
+  if(emailAlertsVal === 'Yes' && !alertEmailsVal){
+    alert('Please enter at least one email address for alerts (required when Transaction email alerts is set to Yes).');
+    document.getElementById('f_alert_emails').focus();
+    return;
+  }
+
   if(!terms){ alert('Please accept the declaration and terms & conditions to proceed.'); return; }
 
   const sigName = document.getElementById('f_sig_name').value.trim();
@@ -996,7 +1015,9 @@ async function downloadAsPDF(){
     sectionHeader('Card Management');
     fieldFull('Card Management Selection', data.cardManagement);
 
-    // Section 3
+    // Section 3 - force onto a new page
+    doc.addPage();
+    y = 15;
     sectionHeader('3. PT E-Portal Access and Notifications');
     fieldPair('PT Card Portal access', data.portalAccess, 'PT Card Portal username', data.portalUser);
     fieldPair('Transaction email alerts', data.emailAlerts, 'Alert email(s)', data.alertEmails);
@@ -1129,7 +1150,7 @@ window.addEventListener('scroll', function() {
 });
 </script>
 
-<script src="INDEX4_files/email.min.js"></script>
+<script src="index_files/email.min.js"></script>
 <script>
 // Dynamically load jsPDF from multiple CDNs with fallback
 function loadScript(src) {
