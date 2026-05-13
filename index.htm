@@ -220,7 +220,7 @@
  Fuel Restriction: Cards can only be used for the selected fuel type in 
 the table. (Ex. If Yes is selected and Fuel Type is Gasoline, then the 
 card can only be used for Gasoline)</p>
-    <p style="font-size:14px;font-weight:600;color:#1a1a1a;margin:18px 0 6px">Card limitations</p>
+    <p style="font-size:14px;font-weight:600;color:#1a1a1a;margin:18px 0 6px">Card limitations (Optional)</p>
     <p style="font-size:12px;color:#666;margin-bottom:10px">Limitations can be set as Amount, Quantity, or Transaction limit.</p>
     <div class="table-wrapper">
       <table class="data-table" id="limitsTable">
@@ -545,7 +545,7 @@ identification. Accepted formats: JPG, PNG, HEIC, PDF. Max 10MB.</p>
     </div>
   </div>
 
-  <button class="submit-btn" id="downloadBtn" onclick="downloadAsPDF()" style="background:#0C447C;">Download as PDF</button>
+  <button class="submit-btn" id="downloadBtn" onclick="downloadAsPDF()" style="background:#0C447C;">Submit &amp; Download PDF File</button>
   <button class="submit-btn" onclick="clearAllData()" style="background:#fff;color:#c0392b;border:1.5px solid #c0392b;margin-top:0.75rem;">Clear All Data</button>
   <div class="toast" id="toast"></div>
 
@@ -553,7 +553,7 @@ identification. Accepted formats: JPG, PNG, HEIC, PDF. Max 10MB.</p>
 
 </div>
 
-<button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">⇧</button>
+<button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top" style="display: flex;">⇧</button>
 
 <script>
 function togglePortalUsername(){
@@ -852,7 +852,7 @@ async function downloadAsPDF(){
     const loaded = await ensureJsPDF();
     if (!loaded) {
       showToast('Could not load PDF library. Please check your internet connection and try again.', 'warning');
-      btn.textContent = 'Download as PDF';
+      btn.textContent = 'Submit & Download PDF File';
       btn.disabled = false;
       return;
     }
@@ -1096,13 +1096,13 @@ async function downloadAsPDF(){
     doc.save('PetroTrade_FuelCard_' + safeName + '.pdf');
 
     showToast('PDF downloaded successfully! Please send it to sales@petrotrade.ws', 'success');
-    btn.textContent = 'Download as PDF';
+    btn.textContent = 'Submit & Download PDF File';
     btn.disabled = false;
 
   } catch(err){
     console.error('PDF error:', err);
     showToast('Failed to generate PDF: ' + err.message, 'warning');
-    btn.textContent = 'Download as PDF';
+    btn.textContent = 'Submit & Download PDF File';
     btn.disabled = false;
   }
 }
@@ -1150,7 +1150,7 @@ window.addEventListener('scroll', function() {
 });
 </script>
 
-<script src="index_files/email.min.js"></script>
+<script src="INDEX1_files/email.min.js"></script>
 <script>
 // Dynamically load jsPDF from multiple CDNs with fallback
 function loadScript(src) {
@@ -1179,5 +1179,6 @@ async function ensureJsPDF() {
   return false;
 }
 </script>
+
 
 </body></html>
