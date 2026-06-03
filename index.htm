@@ -220,7 +220,7 @@
  Fuel Restriction: Cards can only be used for the selected fuel type in 
 the table. (Ex. If Yes is selected and Fuel Type is Gasoline, then the 
 card can only be used for Gasoline)</p>
-    <p style="font-size:14px;font-weight:600;color:#1a1a1a;margin:18px 0 6px">Card limitations (Optional) <span style="color:#e24b4a;font-weight:700;">***PLEASE SELECT THE LIMIT TYPE, IF A LIMIT IS NEEDED.***</span></p>
+    <p style="font-size:14px;font-weight:600;color:#1a1a1a;margin:18px 0 6px">Card limitations (Optional)</p>
     <p style="font-size:12px;color:#666;margin-bottom:10px">Limitations can be set as Amount, Quantity, or Transaction limit.</p>
     <div class="table-wrapper">
       <table class="data-table" id="limitsTable">
@@ -1047,9 +1047,9 @@ async function downloadAsPDF(){
     doc.rect(margin, y, 80, 28);
     y += 32;
 
-    // Section 8 - ID Document
-    y += 8;
-    addPageIfNeeded(30);
+    // Section 8 - ID Document (always on a new page)
+    doc.addPage();
+    y = 15;
     doc.setFillColor(230, 241, 251);
     doc.rect(margin, y, col, 8, 'F');
     doc.setTextColor(24, 95, 165);
