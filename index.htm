@@ -71,6 +71,37 @@
   .toast.success { display: block; background: #EAF3DE; border: 1px solid #639922; color: #27500A; }
   .toast.warning { display: block; background: #FAEEDA; border: 1px solid #BA7517; color: #633806; }
 
+  /* Success popup modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    background: rgba(7, 30, 56, 0.55); backdrop-filter: blur(2px);
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: #fff; border-radius: 16px; max-width: 420px; width: 100%;
+    padding: 32px 28px 26px; text-align: center;
+    box-shadow: 0 18px 50px rgba(7, 30, 56, 0.35);
+    animation: modalPop .22s ease-out;
+  }
+  @keyframes modalPop { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-icon {
+    width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 18px;
+    background: #EAF3DE; display: flex; align-items: center; justify-content: center;
+  }
+  .modal-icon svg { width: 34px; height: 34px; }
+  .modal-box h3 { margin: 0 0 10px; font-size: 20px; color: #0C447C; }
+  .modal-box p { margin: 0 0 8px; font-size: 14px; color: #444; line-height: 1.5; }
+  .modal-box .modal-email { font-weight: 600; color: #185FA5; word-break: break-all; }
+  .modal-box .modal-email-line { font-size: 18px; font-weight: 600; color: #0C447C; margin-top: 12px; }
+  .modal-box .modal-email-line .modal-email { font-size: 20px; }
+  .modal-close-btn {
+    margin-top: 22px; width: 100%; padding: 13px; background: #0C447C; color: #fff;
+    border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: background .15s;
+  }
+  .modal-close-btn:hover { background: #185FA5; }
+
   .setup-note { background: #EBF4FF; border: 1px solid #B5D4F4; border-radius: 10px; padding: 1.25rem 1.5rem; margin-top: 1.25rem; font-size: 13px; color: #0C447C; }
   .setup-note strong { font-weight: 600; display: block; margin-bottom: 6px; font-size: 14px; }
   .setup-note ol { margin-left: 1.25rem; margin-top: 6px; }
@@ -553,6 +584,21 @@ identification. Accepted formats: JPG, PNG, HEIC, PDF. Max 10MB.</p>
 
 </div>
 
+<!-- Success popup modal -->
+<div class="modal-overlay" id="successModal" onclick="if(event.target===this)closeSuccessModal()">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="successModalTitle">
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 13l4 4L19 7" stroke="#639922" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h3 id="successModalTitle">Form Submitted Successfully</h3>
+    <p>Your fuel card application PDF has been downloaded.</p>
+    <p class="modal-email-line">Please email the PDF file to<br><span class="modal-email">sales@petrotrade.ws</span></p>
+    <button class="modal-close-btn" onclick="closeSuccessModal()">Got it</button>
+  </div>
+</div>
+
 <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top" style="display: flex;">⇧</button>
 
 <script>
@@ -781,6 +827,16 @@ function showToast(msg, type){
   t.textContent = msg;
   t.className = 'toast ' + type;
 }
+
+function showSuccessModal(){
+  document.getElementById('successModal').classList.add('show');
+}
+function closeSuccessModal(){
+  document.getElementById('successModal').classList.remove('show');
+}
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') closeSuccessModal();
+});
 
 
 async function downloadAsPDF(){
@@ -1136,6 +1192,7 @@ async function downloadAsPDF(){
     doc.save('PetroTrade_FuelCard_' + safeName + '.pdf');
 
     showToast('PDF downloaded successfully! Please send it to sales@petrotrade.ws', 'success');
+    showSuccessModal();
     btn.textContent = 'Submit & Download PDF File';
     btn.disabled = false;
 
