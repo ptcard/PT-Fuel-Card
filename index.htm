@@ -554,7 +554,7 @@ be governed by and construed in accordance with the laws of Liberia. Any
     <label style="font-size:12px;color:#555;font-weight:500;display:block;margin-bottom:6px;">Signature <span class="required">*</span></label>
     <p style="font-size:13px;color:#666;margin-bottom:10px;">Draw your signature below using your mouse or finger (touch screens supported).</p>
     <div class="sig-outer">
-      <canvas id="sigCanvas" class="sig-canvas" height="170" width="680"></canvas>
+      <canvas id="sigCanvas" class="sig-canvas" height="260" width="680"></canvas>
     </div>
     <div class="sig-actions">
       <button class="sig-btn" onclick="clearSig()">Clear signature</button>
@@ -738,12 +738,30 @@ const canvas = document.getElementById('sigCanvas');
 const ctx = canvas.getContext('2d');
 let drawing = false, hasSig = false;
 
-function resizeCanvas(){
-  canvas.width = canvas.offsetWidth;
+function applyStrokeStyle(){
   ctx.strokeStyle = '#0C447C';
   ctx.lineWidth = 2.2;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
+}
+function resizeCanvas(){
+  const newWidth = canvas.offsetWidth;
+  // If the width hasn't changed (e.g. mobile address bar hiding on scroll
+  // only changes height), do NOT touch canvas.width — assigning to it would
+  // wipe the existing signature.
+  if(newWidth === canvas.width){
+    applyStrokeStyle();
+    return;
+  }
+  // Width genuinely changed (e.g. screen rotation): preserve the drawing.
+  const saved = hasSig ? canvas.toDataURL() : null;
+  canvas.width = newWidth;
+  applyStrokeStyle();
+  if(saved){
+    const img = new Image();
+    img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    img.src = saved;
+  }
 }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
