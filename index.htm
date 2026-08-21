@@ -7,7 +7,7 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f6f9; color: #1a1a1a; font-size: 15px; line-height: 1.6; }
-  .page-wrap { max-width: 780px; margin: 2rem auto; padding: 0 1rem 4rem; }
+  .page-wrap { max-width: 1040px; margin: 2rem auto; padding: 0 1rem 4rem; }
 
   .logo-bar { background: #ffffff; border-radius: 12px; border: 1px solid #e0e4ea; padding: 1.5rem 2rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; }
   .logo-bar .brand { color: #E6F1FB; font-size: 22px; font-weight: 600; }
@@ -40,7 +40,8 @@
 
   .table-wrapper { overflow-x: auto; }
   table.data-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; min-width: 560px; }
-  table.data-table th { background: #f0f4f8; color: #555; font-weight: 600; font-size: 11px; padding: 9px 8px; border: 1px solid #dde2ea; text-align: left; text-transform: uppercase; letter-spacing: .5px; }
+  table.data-table th { background: #f0f4f8; color: #555; font-weight: 600; font-size: 11px; padding: 9px 6px; border: 1px solid #dde2ea; text-align: left; text-transform: uppercase; letter-spacing: .3px; word-break: break-word; overflow-wrap: break-word; hyphens: auto; }
+  #limitsTable { min-width: 780px; }
   table.data-table td { padding: 4px 4px; border: 1px solid #dde2ea; }
   table.data-table td input, table.data-table td select {
     border: none; background: transparent; width: 100%;
@@ -257,21 +258,23 @@ card can only be used for Gasoline)</p>
       <table class="data-table" id="limitsTable">
         <thead>
           <tr>
-            <th style="width:4%">#</th>
-            <th style="width:14%">Registration no.</th>
-            <th style="width:18%">Limit type</th>
-            <th style="width:13%">Per transaction</th>
-            <th style="width:13%">Per day</th>
-            <th style="width:13%">Per week</th>
-            <th style="width:13%">Per month</th>
-            <th style="width:5%"></th>
+            <th style="width:3%">#</th>
+            <th style="width:15%">Registration no.</th>
+            <th style="width:15%">Limit type</th>
+            <th style="width:14%">Location</th>
+            <th style="width:15%">Per transaction</th>
+            <th style="width:11%">Per day</th>
+            <th style="width:11%">Per week</th>
+            <th style="width:12%">Per month</th>
+            <th style="width:4%"></th>
           </tr>
         </thead>
         <tbody id="limitsBody">
           <tr data-row-index="0">
             <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">1</td>
             <td><input type="text" placeholder="Auto-filled" readonly="readonly" style="background:#f0f4f8;color:#555;cursor:default;"></td>
-            <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">None</option><option>Amount (US$)</option><option>Quantity (Gallons)</option><option>Transaction (No. of Trx.)</option></select></td>
+            <td><select onchange="toggleLocationField(this)" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">None</option><option>Amount (US$)</option><option>Quantity (Gallons)</option><option>Transaction (No. of Trx.)</option><option>Location</option></select></td>
+            <td><select class="loc-select" disabled="disabled" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">-- Select --</option><option>72ND Junction</option><option>9TH St. Sinkor</option><option>Battery Factory</option><option>Bong Mines Bridge</option><option>Clara Town</option><option>Coca Cola Factory</option><option>Duport Road</option><option>ELWA</option><option>Ganta</option><option>Gbarnga</option><option>Jacob Town</option><option>Klay</option><option>Lynch Street</option><option>R2</option><option>SD Cooper</option><option>Vamouma</option></select></td>
             <td><input type="text" placeholder="0.00"></td>
             <td><input type="text" placeholder="0.00"></td>
             <td><input type="text" placeholder="0.00"></td>
@@ -589,7 +592,7 @@ identification. Accepted formats: JPG, PNG, HEIC, PDF. Max 10MB.</p>
   <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="successModalTitle">
     <div class="modal-icon">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M5 13l4 4L19 7" stroke="#639922" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M5 13l4 4L19 7" stroke="#639922" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
       </svg>
     </div>
     <h3 id="successModalTitle">Form Submitted Successfully</h3>
@@ -645,13 +648,31 @@ function addLimitRow(){
   tr.innerHTML = `
     <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">${rowNum}</td>
     <td><input type="text" placeholder="Auto-filled" value="${matchingReg}" readonly style="background:#f0f4f8;color:#555;cursor:default;"></td>
-    <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">None</option><option>Amount (US$)</option><option>Quantity (Gallons)</option><option>Transaction (No. of Trx.)</option></select></td>
+    <td><select onchange="toggleLocationField(this)" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">None</option><option>Amount (US$)</option><option>Quantity (Gallons)</option><option>Transaction (No. of Trx.)</option><option>Location</option></select></td>
+    <td>${locationSelectHTML()}</td>
     <td><input type="text" placeholder="0.00"></td>
     <td><input type="text" placeholder="0.00"></td>
     <td><input type="text" placeholder="0.00"></td>
     <td><input type="text" placeholder="0.00"></td>
     <td><button class="del-btn" onclick="removeLimitRow(this)">×</button></td>`;
   tb.appendChild(tr);
+}
+
+function locationSelectHTML(){
+  return '<select class="loc-select" disabled style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected>-- Select --</option><option>72ND Junction</option><option>9TH St. Sinkor</option><option>Battery Factory</option><option>Bong Mines Bridge</option><option>Clara Town</option><option>Coca Cola Factory</option><option>Duport Road</option><option>ELWA</option><option>Ganta</option><option>Gbarnga</option><option>Jacob Town</option><option>Klay</option><option>Lynch Street</option><option>R2</option><option>SD Cooper</option><option>Vamouma</option></select>';
+}
+
+function toggleLocationField(selectEl){
+  const row = selectEl.closest('tr');
+  if(!row) return;
+  const locSelect = row.querySelector('.loc-select');
+  if(!locSelect) return;
+  if(selectEl.value === 'Location'){
+    locSelect.disabled = false;
+  } else {
+    locSelect.disabled = true;
+    locSelect.selectedIndex = 0;
+  }
 }
 
 
@@ -702,7 +723,8 @@ function syncRowsToCardCount(val) {
     tr.innerHTML = `
       <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">${num}</td>
       <td><input type="text" placeholder="Auto-filled" value="${matchingReg}" readonly style="background:#f0f4f8;color:#555;cursor:default;"></td>
-      <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">None</option><option>Amount (US$)</option><option>Quantity (Gallons)</option><option>Transaction (No. of Trx.)</option></select></td>
+      <td><select onchange="toggleLocationField(this)" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">None</option><option>Amount (US$)</option><option>Quantity (Gallons)</option><option>Transaction (No. of Trx.)</option><option>Location</option></select></td>
+      <td>${locationSelectHTML()}</td>
       <td><input type="text" placeholder="0.00"></td>
       <td><input type="text" placeholder="0.00"></td>
       <td><input type="text" placeholder="0.00"></td>
@@ -805,7 +827,7 @@ function collectFormData(){
     // Collect row if ANY field has data
     const hasData = Array.from(inputs).some(el => el.value && el.value.trim() !== '' && el.value !== '—' && el.value !== '-');
     if(hasData){
-      limitRows.push({ num: i+1, reg: inputs[0].value||'-', type: inputs[1].value||'-', trx: inputs[2].value||'-', day: inputs[3].value||'-', week: inputs[4].value||'-', month: inputs[5].value||'-' });
+      limitRows.push({ num: i+1, reg: inputs[0].value||'-', type: inputs[1].value||'-', location: inputs[2].value||'-', trx: inputs[3].value||'-', day: inputs[4].value||'-', week: inputs[5].value||'-', month: inputs[6].value||'-' });
     }
   });
   const applicantTypeRadio = document.querySelector('input[name="applicantType"]:checked');
@@ -1055,8 +1077,8 @@ async function downloadAsPDF(){
     addPageIfNeeded(20);
     doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(80,80,80);
     doc.text('Card Limitations', margin, y); y += 5;
-    const lCols = ['#','Reg No.','Limit Type','Per Trx','Per Day','Per Week','Per Month'];
-    const lW = [8, 25, 38, 22, 22, 22, 22];
+    const lCols = ['#','Reg No.','Limit Type','Location','Per Trx','Per Day','Per Week','Per Month'];
+    const lW = [8, 24, 26, 24, 19, 19, 19, 19];
     doc.setFillColor(240,244,248);
     doc.rect(margin, y, col, 7, 'F');
     doc.setTextColor(85,85,85); doc.setFontSize(7); doc.setFont('helvetica','bold');
@@ -1065,7 +1087,7 @@ async function downloadAsPDF(){
     y += 7;
     if(data.limitRows.length > 0){
       data.limitRows.forEach((r,idx)=>{
-        const cellValues = [String(r.num),r.reg,r.type,r.trx,r.day,r.week,r.month];
+        const cellValues = [String(r.num),r.reg,r.type,r.location,r.trx,r.day,r.week,r.month];
         const wrappedCells = cellValues.map((v,i) => doc.splitTextToSize(String(v||'-'), lW[i] - 2));
         const rowH = Math.max(6, Math.max(...wrappedCells.map(w => w.length)) * 5 + 2);
         addPageIfNeeded(rowH);
@@ -1242,6 +1264,7 @@ function clearAllData() {
   while (limitsBody.rows.length > 1) limitsBody.deleteRow(limitsBody.rows.length - 1);
   limitsBody.querySelectorAll('input').forEach(el => el.value = '');
   limitsBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  limitsBody.querySelectorAll('.loc-select').forEach(el => el.disabled = true);
 
   // Clear signature
   clearSig();
@@ -1265,7 +1288,7 @@ window.addEventListener('scroll', function() {
 });
 </script>
 
-<script src="INDEX1_files/email.min.js"></script>
+<script src="Index%209_files/email.min_vd3s.js"></script>
 <script>
 // Dynamically load jsPDF from multiple CDNs with fallback
 function loadScript(src) {
@@ -1310,6 +1333,7 @@ async function ensurePdfJs() {
   throw new Error('Could not load pdf.js library');
 }
 </script>
+
 
 
 </body></html>
