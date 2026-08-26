@@ -321,16 +321,35 @@ card can only be used for Gasoline)</p>
       </div>
     </div>
 
-    <div class="field-grid" id="portalUsernameRow" style="margin-bottom:14px;display:none">
-      <div class="field">
-        <label>PT Card Portal username <span class="required">*</span></label>
-        <input type="text" id="f_portal_username" placeholder="Enter desired username">
+    <div id="portalUsernameRow" style="margin-bottom:14px;display:none">
+      <label style="font-size:12px;color:#555;font-weight:500;display:block;margin-bottom:6px">PT Card Portal user(s) <span class="required">*</span></label>
+      <div class="table-wrapper">
+        <table class="data-table" id="userRolesTable">
+          <thead>
+            <tr>
+              <th style="width:8%">#</th>
+              <th style="width:44%">User Role <span class="required">*</span></th>
+              <th style="width:40%">Username <span class="required">*</span></th>
+              <th style="width:8%"></th>
+            </tr>
+          </thead>
+          <tbody id="userRolesBody">
+            <tr>
+              <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">1</td>
+              <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">— Select —</option><option>Fleet Manager</option><option>Customer Role</option></select></td>
+              <td><input type="text" placeholder="Enter desired username"></td>
+              <td><button class="del-btn" onclick="removeUserRoleRow(this)">×</button></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+      <button class="add-row-btn" onclick="addUserRoleRow()">+ Add row</button>
+      <p style="margin-top:10px;font-size:14px;color:#c0392b;line-height:1.6;"><strong>User Roles:</strong><br>1. Fleet Manager - Authorized to add/deduct funds to the cards.<br>2. Customer Role - Can only view transactions/reports.</p>
     </div>
 
     <div class="field-grid" style="margin-bottom:14px">
       <div class="field">
-        <label>Transaction email alerts</label>
+        <label>Transaction(s) email alerts</label>
         <select id="f_email_alerts" onchange="toggleAlertEmail()">
           <option value="" selected="selected">— Select —</option>
           <option>Yes</option>
@@ -607,7 +626,7 @@ identification. Accepted formats: JPG, PNG, HEIC, PDF. Max 10MB.</p>
 <script>
 function togglePortalUsername(){
   const val = document.getElementById('f_portal_access').value;
-  document.getElementById('portalUsernameRow').style.display = val === 'Yes' ? 'grid' : 'none';
+  document.getElementById('portalUsernameRow').style.display = val === 'Yes' ? 'block' : 'none';
 }
 
 function onCardManagementChange(radio){
@@ -615,6 +634,30 @@ function onCardManagementChange(radio){
     document.getElementById('f_portal_access').value = 'Yes';
     togglePortalUsername();
   }
+}
+
+function removeUserRoleRow(btn){
+  const rows = document.querySelectorAll('#userRolesBody tr');
+  if(rows.length > 1) btn.closest('tr').remove();
+  renumberUserRoleRows();
+}
+
+function addUserRoleRow(){
+  const tb = document.getElementById('userRolesBody');
+  const rowNum = tb.querySelectorAll('tr').length + 1;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">${rowNum}</td>
+    <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">— Select —</option><option>Fleet Manager</option><option>Customer Role</option></select></td>
+    <td><input type="text" placeholder="Enter desired username"></td>
+    <td><button class="del-btn" onclick="removeUserRoleRow(this)">×</button></td>`;
+  tb.appendChild(tr);
+}
+
+function renumberUserRoleRows(){
+  document.querySelectorAll('#userRolesBody tr').forEach((row, i) => {
+    row.querySelector('td').textContent = i + 1;
+  });
 }
 
 
@@ -837,6 +880,14 @@ function collectFormData(){
       limitRows.push({ num: i+1, reg: inputs[0].value||'-', type: inputs[1].value||'-', location: inputs[2].value||'-', trx: inputs[3].value||'-', day: inputs[4].value||'-', week: inputs[5].value||'-', month: inputs[6].value||'-' });
     }
   });
+  const userRoles = [];
+  document.querySelectorAll('#userRolesBody tr').forEach((row, i) => {
+    const role = row.querySelector('select').value;
+    const username = row.querySelector('input[type="text"]').value.trim();
+    if(role || username){
+      userRoles.push({ num: i+1, role: role||'-', username: username||'-' });
+    }
+  });
   const applicantTypeRadio = document.querySelector('input[name="applicantType"]:checked');
   const cardMgmtRadio = document.querySelector('input[name="cardManagement"]:checked');
   return {
@@ -855,7 +906,6 @@ function collectFormData(){
     addr: document.getElementById('f_addr').value.trim(),
     numCards: document.getElementById('f_num_cards').value||'-',
     portalAccess: document.getElementById('f_portal_access').value||'-',
-    portalUser: document.getElementById('f_portal_username').value||'-',
     emailAlerts: document.getElementById('f_email_alerts').value||'-',
     alertEmails: document.getElementById('f_alert_emails').value||'-',
     color: document.getElementById('f_color').value||'-',
@@ -864,7 +914,7 @@ function collectFormData(){
     sigName: document.getElementById('f_sig_name').value||'-',
     sigDate: document.getElementById('f_sig_date').value||'-',
     idFileName: uploadedFile ? uploadedFile.name : '-',
-    vehicleRows, limitRows,
+    vehicleRows, limitRows, userRoles,
     submittedAt: new Date().toLocaleString()
   };
 }
@@ -918,20 +968,31 @@ async function downloadAsPDF(){
   if(!favColor){ alert('Please select your favorite color (Security Question 1).'); return; }
   if(!favNumber){ alert('Please select your favorite number (Security Question 2).'); return; }
 
-  // If PT Card Portal access is Yes, username is required
+  // If PT Card Portal access is Yes, at least one user (Role + Username) is required
   const portalAccessVal = document.getElementById('f_portal_access').value;
-  const portalUsernameVal = document.getElementById('f_portal_username').value.trim();
-  if(portalAccessVal === 'Yes' && !portalUsernameVal){
-    alert('Please enter a PT Card Portal username (required when Portal access is set to Yes).');
-    document.getElementById('f_portal_username').focus();
-    return;
+  if(portalAccessVal === 'Yes'){
+    const roleRows = document.querySelectorAll('#userRolesBody tr');
+    let hasValidUser = false;
+    for(let i = 0; i < roleRows.length; i++){
+      const roleVal = roleRows[i].querySelector('select').value.trim();
+      const usernameVal = roleRows[i].querySelector('input[type="text"]').value.trim();
+      if((roleVal && !usernameVal) || (!roleVal && usernameVal)){
+        alert('Row ' + (i+1) + ' in the PT Card Portal user table needs both a User Role and Username.');
+        return;
+      }
+      if(roleVal && usernameVal) hasValidUser = true;
+    }
+    if(!hasValidUser){
+      alert('Please add at least one PT Card Portal user (User Role and Username) since Portal access is set to Yes.');
+      return;
+    }
   }
 
-  // If Transaction email alerts is Yes, alert email(s) are required
+  // If Transaction(s) email alerts is Yes, alert email(s) are required
   const emailAlertsVal = document.getElementById('f_email_alerts').value;
   const alertEmailsVal = document.getElementById('f_alert_emails').value.trim();
   if(emailAlertsVal === 'Yes' && !alertEmailsVal){
-    alert('Please enter at least one email address for alerts (required when Transaction email alerts is set to Yes).');
+    alert('Please enter at least one email address for alerts (required when Transaction(s) email alerts is set to Yes).');
     document.getElementById('f_alert_emails').focus();
     return;
   }
@@ -1122,8 +1183,42 @@ async function downloadAsPDF(){
     doc.addPage();
     y = 15;
     sectionHeader('3. PT E-Portal Access and Notifications');
-    fieldPair('PT Card Portal access', data.portalAccess, 'PT Card Portal username', data.portalUser);
-    fieldPair('Transaction email alerts', data.emailAlerts, 'Alert email(s)', data.alertEmails);
+    fieldFull('PT Card Portal access', data.portalAccess);
+    if(data.portalAccess === 'Yes'){
+      addPageIfNeeded(20);
+      doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(80,80,80);
+      doc.text('PT Card Portal Users', margin, y); y += 5;
+      const uCols = ['#','User Role','Username'];
+      const uW = [10, 70, 90];
+      doc.setFillColor(240,244,248);
+      doc.rect(margin, y, col, 7, 'F');
+      doc.setTextColor(85,85,85); doc.setFontSize(7); doc.setFont('helvetica','bold');
+      let ux = margin;
+      uCols.forEach((c,i)=>{ doc.text(c, ux+1, y+5); ux+=uW[i]; });
+      y += 7;
+      if(data.userRoles.length > 0){
+        data.userRoles.forEach((r,idx)=>{
+          const cellValues = [String(r.num), r.role, r.username];
+          const wrappedCells = cellValues.map((v,i) => doc.splitTextToSize(String(v||'-'), uW[i] - 2));
+          const rowH = Math.max(6, Math.max(...wrappedCells.map(w => w.length)) * 5 + 2);
+          addPageIfNeeded(rowH);
+          if(idx%2===0){ doc.setFillColor(250,251,252); doc.rect(margin, y, col, rowH, 'F'); }
+          doc.setTextColor(26,26,26); doc.setFont('helvetica','normal'); doc.setFontSize(8);
+          ux = margin;
+          wrappedCells.forEach((lines, i) => {
+            doc.text(lines, ux+1, y+4);
+            ux += uW[i];
+          });
+          y += rowH;
+        });
+      } else {
+        doc.setTextColor(150,150,150); doc.setFont('helvetica','italic'); doc.setFontSize(8);
+        doc.text('No portal users specified', margin+2, y+4);
+        y += 6;
+      }
+      y += 5;
+    }
+    fieldPair('Transaction(s) email alerts', data.emailAlerts, 'Alert email(s)', data.alertEmails);
 
     // Section 4
     sectionHeader('4. Security Questions');
@@ -1272,6 +1367,13 @@ function clearAllData() {
   limitsBody.querySelectorAll('input').forEach(el => el.value = '');
   limitsBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
   limitsBody.querySelectorAll('.loc-select').forEach(el => el.disabled = true);
+
+  // Reset PT Card Portal users table to 1 row
+  const userRolesBody = document.getElementById('userRolesBody');
+  while (userRolesBody.rows.length > 1) userRolesBody.deleteRow(userRolesBody.rows.length - 1);
+  userRolesBody.querySelectorAll('input').forEach(el => el.value = '');
+  userRolesBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  renumberUserRoleRows();
 
   // Clear signature
   clearSig();
