@@ -327,10 +327,12 @@ card can only be used for Gasoline)</p>
         <table class="data-table" id="userRolesTable">
           <thead>
             <tr>
-              <th style="width:8%">#</th>
-              <th style="width:44%">User Role <span class="required">*</span></th>
-              <th style="width:40%">Username <span class="required">*</span></th>
-              <th style="width:8%"></th>
+              <th style="width:6%">#</th>
+              <th style="width:24%">User Role <span class="required">*</span></th>
+              <th style="width:20%">Username <span class="required">*</span></th>
+              <th style="width:22%">Receive Transaction(s) Email Alert <span class="required">*</span></th>
+              <th style="width:22%">Email Address <span class="required">*</span></th>
+              <th style="width:6%"></th>
             </tr>
           </thead>
           <tbody id="userRolesBody">
@@ -338,6 +340,8 @@ card can only be used for Gasoline)</p>
               <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">1</td>
               <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">— Select —</option><option>Fleet Manager</option><option>Customer Role</option></select></td>
               <td><input type="text" placeholder="Enter desired username"></td>
+              <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">— Select —</option><option>Yes</option><option>No</option></select></td>
+              <td><input type="text" placeholder="e.g. name@company.com"></td>
               <td><button class="del-btn" onclick="removeUserRoleRow(this)">×</button></td>
             </tr>
           </tbody>
@@ -345,25 +349,6 @@ card can only be used for Gasoline)</p>
       </div>
       <button class="add-row-btn" onclick="addUserRoleRow()">+ Add row</button>
       <p style="margin-top:10px;font-size:14px;color:#c0392b;line-height:1.6;"><strong>User Roles:</strong><br>1. Fleet Manager - Authorized to add/deduct funds to the cards.<br>2. Customer Role - Can only view transactions/reports.</p>
-    </div>
-
-    <div class="field-grid" style="margin-bottom:14px">
-      <div class="field">
-        <label>Transaction(s) email alerts</label>
-        <select id="f_email_alerts" onchange="toggleAlertEmail()">
-          <option value="" selected="selected">— Select —</option>
-          <option>Yes</option>
-          <option>No</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="field-grid" id="alertEmailRow" style="display:none">
-      <div class="field full">
-        <label>Email address(es) for alerts <span class="required">*</span></label>
-        <input type="text" id="f_alert_emails" placeholder="e.g. alerts@company.com, manager@company.com">
-        <span class="hint">Separate multiple email addresses with a comma</span>
-      </div>
     </div>
   </div>
 
@@ -650,6 +635,8 @@ function addUserRoleRow(){
     <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">${rowNum}</td>
     <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">— Select —</option><option>Fleet Manager</option><option>Customer Role</option></select></td>
     <td><input type="text" placeholder="Enter desired username"></td>
+    <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">— Select —</option><option>Yes</option><option>No</option></select></td>
+    <td><input type="text" placeholder="e.g. name@company.com"></td>
     <td><button class="del-btn" onclick="removeUserRoleRow(this)">×</button></td>`;
   tb.appendChild(tr);
 }
@@ -658,12 +645,6 @@ function renumberUserRoleRows(){
   document.querySelectorAll('#userRolesBody tr').forEach((row, i) => {
     row.querySelector('td').textContent = i + 1;
   });
-}
-
-
-function toggleAlertEmail(){
-  const val = document.getElementById('f_email_alerts').value;
-  document.getElementById('alertEmailRow').style.display = val === 'Yes' ? 'grid' : 'none';
 }
 
 function addRow(){
@@ -882,10 +863,14 @@ function collectFormData(){
   });
   const userRoles = [];
   document.querySelectorAll('#userRolesBody tr').forEach((row, i) => {
-    const role = row.querySelector('select').value;
-    const username = row.querySelector('input[type="text"]').value.trim();
-    if(role || username){
-      userRoles.push({ num: i+1, role: role||'-', username: username||'-' });
+    const selects = row.querySelectorAll('select');
+    const inputs = row.querySelectorAll('input[type="text"]');
+    const role = selects[0].value;
+    const username = inputs[0].value.trim();
+    const emailAlert = selects[1].value;
+    const emailAddress = inputs[1].value.trim();
+    if(role || username || emailAlert || emailAddress){
+      userRoles.push({ num: i+1, role: role||'-', username: username||'-', emailAlert: emailAlert||'-', emailAddress: emailAddress||'-' });
     }
   });
   const applicantTypeRadio = document.querySelector('input[name="applicantType"]:checked');
@@ -906,8 +891,6 @@ function collectFormData(){
     addr: document.getElementById('f_addr').value.trim(),
     numCards: document.getElementById('f_num_cards').value||'-',
     portalAccess: document.getElementById('f_portal_access').value||'-',
-    emailAlerts: document.getElementById('f_email_alerts').value||'-',
-    alertEmails: document.getElementById('f_alert_emails').value||'-',
     color: document.getElementById('f_color').value||'-',
     number: document.getElementById('f_number').value||'-',
     extraNotes: document.getElementById('f_notes').value||'-',
@@ -968,33 +951,30 @@ async function downloadAsPDF(){
   if(!favColor){ alert('Please select your favorite color (Security Question 1).'); return; }
   if(!favNumber){ alert('Please select your favorite number (Security Question 2).'); return; }
 
-  // If PT Card Portal access is Yes, at least one user (Role + Username) is required
+  // If PT Card Portal access is Yes, at least one complete user row is required
   const portalAccessVal = document.getElementById('f_portal_access').value;
   if(portalAccessVal === 'Yes'){
     const roleRows = document.querySelectorAll('#userRolesBody tr');
     let hasValidUser = false;
     for(let i = 0; i < roleRows.length; i++){
-      const roleVal = roleRows[i].querySelector('select').value.trim();
-      const usernameVal = roleRows[i].querySelector('input[type="text"]').value.trim();
-      if((roleVal && !usernameVal) || (!roleVal && usernameVal)){
-        alert('Row ' + (i+1) + ' in the PT Card Portal user table needs both a User Role and Username.');
+      const selects = roleRows[i].querySelectorAll('select');
+      const inputs = roleRows[i].querySelectorAll('input[type="text"]');
+      const roleVal = selects[0].value.trim();
+      const usernameVal = inputs[0].value.trim();
+      const emailAlertVal = selects[1].value.trim();
+      const emailAddressVal = inputs[1].value.trim();
+      const anyFilled = roleVal || usernameVal || emailAlertVal || emailAddressVal;
+      const allFilled = roleVal && usernameVal && emailAlertVal && emailAddressVal;
+      if(anyFilled && !allFilled){
+        alert('Row ' + (i+1) + ' in the PT Card Portal user table needs a User Role, Username, Receive Transaction(s) Email Alert selection, and Email Address.');
         return;
       }
-      if(roleVal && usernameVal) hasValidUser = true;
+      if(allFilled) hasValidUser = true;
     }
     if(!hasValidUser){
-      alert('Please add at least one PT Card Portal user (User Role and Username) since Portal access is set to Yes.');
+      alert('Please add at least one complete PT Card Portal user (User Role, Username, Receive Transaction(s) Email Alert, and Email Address) since Portal access is set to Yes.');
       return;
     }
-  }
-
-  // If Transaction(s) email alerts is Yes, alert email(s) are required
-  const emailAlertsVal = document.getElementById('f_email_alerts').value;
-  const alertEmailsVal = document.getElementById('f_alert_emails').value.trim();
-  if(emailAlertsVal === 'Yes' && !alertEmailsVal){
-    alert('Please enter at least one email address for alerts (required when Transaction(s) email alerts is set to Yes).');
-    document.getElementById('f_alert_emails').focus();
-    return;
   }
 
   if(!terms){ alert('Please accept the declaration and terms & conditions to proceed.'); return; }
@@ -1194,8 +1174,8 @@ async function downloadAsPDF(){
       addPageIfNeeded(20);
       doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(80,80,80);
       doc.text('PT Card Portal Users', margin, y); y += 5;
-      const uCols = ['#','User Role','Username'];
-      const uW = [10, 70, 90];
+      const uCols = ['#','User Role','Username','Email Alert','Email Address'];
+      const uW = [8, 38, 34, 30, 70];
       doc.setFillColor(240,244,248);
       doc.rect(margin, y, col, 7, 'F');
       doc.setTextColor(85,85,85); doc.setFontSize(7); doc.setFont('helvetica','bold');
@@ -1204,7 +1184,7 @@ async function downloadAsPDF(){
       y += 7;
       if(data.userRoles.length > 0){
         data.userRoles.forEach((r,idx)=>{
-          const cellValues = [String(r.num), r.role, r.username];
+          const cellValues = [String(r.num), r.role, r.username, r.emailAlert, r.emailAddress];
           const wrappedCells = cellValues.map((v,i) => doc.splitTextToSize(String(v||'-'), uW[i] - 2));
           const rowH = Math.max(6, Math.max(...wrappedCells.map(w => w.length)) * 5 + 2);
           addPageIfNeeded(rowH);
@@ -1224,7 +1204,6 @@ async function downloadAsPDF(){
       }
       y += 5;
     }
-    fieldPair('Transaction(s) email alerts', data.emailAlerts, 'Alert email(s)', data.alertEmails);
 
     // Section 4
     sectionHeader('4. Security Questions');
@@ -1386,7 +1365,6 @@ function clearAllData() {
 
   // Hide conditional rows
   document.getElementById('portalUsernameRow').style.display = 'none';
-  document.getElementById('alertEmailRow').style.display = 'none';
 
   // Clear file upload
   document.getElementById('f_id_upload').value = '';
