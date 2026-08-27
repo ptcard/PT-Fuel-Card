@@ -1146,7 +1146,9 @@ async function downloadAsPDF(){
     sectionHeader('Card Management');
     fieldFull('Card Management Selection', data.cardManagement);
 
-    // Section 3
+    // Section 3 - force onto page 2
+    doc.addPage();
+    y = 15;
     sectionHeader('3. PT E-Portal Access and Notifications');
     addPageIfNeeded(20);
     doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(80,80,80);
