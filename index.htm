@@ -576,7 +576,7 @@ be governed by and construed in accordance with the laws of Liberia. Any
     <label style="font-size:12px;color:#555;font-weight:500;display:block;margin-bottom:6px;">Signature <span class="required">*</span></label>
     <p style="font-size:13px;color:#666;margin-bottom:10px;">Draw your signature below using your mouse or finger (touch screens supported).</p>
     <div class="sig-outer">
-      <canvas id="sigCanvas" class="sig-canvas" height="260" width="940"></canvas>
+      <canvas id="sigCanvas" class="sig-canvas" height="380" width="940"></canvas>
     </div>
     <div class="sig-actions">
       <button class="sig-btn" onclick="clearSig()">Clear signature</button>
@@ -1039,6 +1039,14 @@ async function downloadAsPDF(){
 
     const addPageIfNeeded = (needed) => { if(y + needed > 278) { doc.addPage(); y = 15; } };
 
+    const formatDateDDMMYYYY = (isoDate) => {
+      if(!isoDate || isoDate === '-') return '-';
+      const parts = String(isoDate).split('-');
+      if(parts.length !== 3) return isoDate;
+      const [yr, mo, da] = parts;
+      return da + '-' + mo + '-' + yr;
+    };
+
     // Header bar
     doc.setFillColor(12, 68, 124);
     doc.rect(0, 0, W, 28, 'F');
@@ -1101,7 +1109,7 @@ async function downloadAsPDF(){
     // Section 1
     sectionHeader('1. Personal Information');
     fieldPair('Entity name or individual name', data.name, 'Contact person full name', data.contact);
-    fieldPair('Date of birth', data.dob, 'Gender', data.gender);
+    fieldPair('Date of birth', formatDateDDMMYYYY(data.dob), 'Gender', data.gender);
     fieldPair('ID / Passport number', data.idNum, 'Nationality', data.nationality);
     fieldPair('Phone number', data.phone, 'Phone number 2', data.phone2);
     fieldPair('Email address', data.email, 'Notes', data.notes);
@@ -1179,9 +1187,7 @@ async function downloadAsPDF(){
     sectionHeader('Card Management');
     fieldFull('Card Management Selection', data.cardManagement);
 
-    // Section 3 - force onto a new page
-    doc.addPage();
-    y = 15;
+    // Section 3
     sectionHeader('3. PT E-Portal Access and Notifications');
     fieldFull('PT Card Portal access', data.portalAccess);
     if(data.portalAccess === 'Yes'){
@@ -1236,14 +1242,14 @@ async function downloadAsPDF(){
 
     // Section 7 - Signature
     sectionHeader('7. Signature');
-    fieldPair('Full name', data.sigName, 'Date', data.sigDate);
-    addPageIfNeeded(38);
+    fieldPair('Full name', data.sigName, 'Date', formatDateDDMMYYYY(data.sigDate));
+    addPageIfNeeded(50);
     doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(100,100,100);
     doc.text('Signature', margin, y); y += 4;
-    doc.addImage(canvas.toDataURL('image/png'), 'PNG', margin, y, 80, 28);
+    doc.addImage(canvas.toDataURL('image/png'), 'PNG', margin, y, 100, 40);
     doc.setDrawColor(180,180,180);
-    doc.rect(margin, y, 80, 28);
-    y += 32;
+    doc.rect(margin, y, 100, 40);
+    y += 44;
 
     // Section 8 - ID Document (always on a new page)
     doc.addPage();
