@@ -258,15 +258,14 @@ card can only be used for Gasoline)</p>
       <table class="data-table" id="limitsTable">
         <thead>
           <tr>
-            <th style="width:3%">#</th>
-            <th style="width:15%">Registration no.</th>
-            <th style="width:15%">Limit type</th>
-            <th style="width:14%">Location</th>
-            <th style="width:15%">Per transaction</th>
-            <th style="width:11%">Per day</th>
-            <th style="width:11%">Per week</th>
-            <th style="width:12%">Per month</th>
-            <th style="width:4%"></th>
+            <th style="width:4%">#</th>
+            <th style="width:16%">Registration no.</th>
+            <th style="width:17%">Limit type</th>
+            <th style="width:16%">Location</th>
+            <th style="width:14%">Per day</th>
+            <th style="width:14%">Per week</th>
+            <th style="width:14%">Per month</th>
+            <th style="width:5%"></th>
           </tr>
         </thead>
         <tbody id="limitsBody">
@@ -275,7 +274,6 @@ card can only be used for Gasoline)</p>
             <td><input type="text" placeholder="Auto-filled" readonly="readonly" style="background:#f0f4f8;color:#555;cursor:default;"></td>
             <td><select onchange="toggleLocationField(this)" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">None</option><option>Amount (US$)</option><option>Quantity (Gallons)</option><option>Transaction (No. of Trx.)</option><option>Location</option></select></td>
             <td><select class="loc-select" disabled="disabled" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">-- Select --</option><option>72ND Junction</option><option>9TH St. Sinkor</option><option>Battery Factory</option><option>Bong Mines Bridge</option><option>Clara Town</option><option>Coca Cola Factory</option><option>Duport Road</option><option>ELWA</option><option>Ganta</option><option>Gbarnga</option><option>Jacob Town</option><option>Klay</option><option>Lynch Street</option><option>R2</option><option>SD Cooper</option><option>Vamouma</option></select></td>
-            <td><input type="text" placeholder="0.00"></td>
             <td><input type="text" placeholder="0.00"></td>
             <td><input type="text" placeholder="0.00"></td>
             <td><input type="text" placeholder="0.00"></td>
@@ -319,7 +317,7 @@ card can only be used for Gasoline)</p>
               <th style="width:6%">#</th>
               <th style="width:24%">User Role <span class="required">*</span></th>
               <th style="width:20%">Username <span class="required">*</span></th>
-              <th style="width:22%">Receive Transaction(s) Email Alert(s) <span class="required">*</span></th>
+              <th style="width:22%">Receive Transaction(s) Email Alert <span class="required">*</span></th>
               <th style="width:22%">Email Address <span class="required">*</span></th>
               <th style="width:6%"></th>
             </tr>
@@ -667,7 +665,6 @@ function addLimitRow(){
     <td><input type="text" placeholder="0.00"></td>
     <td><input type="text" placeholder="0.00"></td>
     <td><input type="text" placeholder="0.00"></td>
-    <td><input type="text" placeholder="0.00"></td>
     <td><button class="del-btn" onclick="removeLimitRow(this)">×</button></td>`;
   tb.appendChild(tr);
 }
@@ -739,7 +736,6 @@ function syncRowsToCardCount(val) {
       <td><input type="text" placeholder="Auto-filled" value="${matchingReg}" readonly style="background:#f0f4f8;color:#555;cursor:default;"></td>
       <td><select onchange="toggleLocationField(this)" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">None</option><option>Amount (US$)</option><option>Quantity (Gallons)</option><option>Transaction (No. of Trx.)</option><option>Location</option></select></td>
       <td>${locationSelectHTML()}</td>
-      <td><input type="text" placeholder="0.00"></td>
       <td><input type="text" placeholder="0.00"></td>
       <td><input type="text" placeholder="0.00"></td>
       <td><input type="text" placeholder="0.00"></td>
@@ -841,7 +837,7 @@ function collectFormData(){
     // Collect row if ANY field has data
     const hasData = Array.from(inputs).some(el => el.value && el.value.trim() !== '' && el.value !== '—' && el.value !== '-');
     if(hasData){
-      limitRows.push({ num: i+1, reg: inputs[0].value||'-', type: inputs[1].value||'-', location: inputs[2].value||'-', trx: inputs[3].value||'-', day: inputs[4].value||'-', week: inputs[5].value||'-', month: inputs[6].value||'-' });
+      limitRows.push({ num: i+1, reg: inputs[0].value||'-', type: inputs[1].value||'-', location: inputs[2].value||'-', day: inputs[3].value||'-', week: inputs[4].value||'-', month: inputs[5].value||'-' });
     }
   });
   const userRoles = [];
@@ -1112,8 +1108,8 @@ async function downloadAsPDF(){
     addPageIfNeeded(20);
     doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(80,80,80);
     doc.text('Card Limitations', margin, y); y += 5;
-    const lCols = ['#','Reg No.','Limit Type','Location','Per Trx','Per Day','Per Week','Per Month'];
-    const lW = [8, 24, 26, 24, 19, 19, 19, 19];
+    const lCols = ['#','Reg No.','Limit Type','Location','Per Day','Per Week','Per Month'];
+    const lW = [8, 28, 30, 28, 24, 24, 24];
     doc.setFillColor(240,244,248);
     doc.rect(margin, y, col, 7, 'F');
     doc.setTextColor(85,85,85); doc.setFontSize(7); doc.setFont('helvetica','bold');
@@ -1122,7 +1118,7 @@ async function downloadAsPDF(){
     y += 7;
     if(data.limitRows.length > 0){
       data.limitRows.forEach((r,idx)=>{
-        const cellValues = [String(r.num),r.reg,r.type,r.location,r.trx,r.day,r.week,r.month];
+        const cellValues = [String(r.num),r.reg,r.type,r.location,r.day,r.week,r.month];
         const wrappedCells = cellValues.map((v,i) => doc.splitTextToSize(String(v||'-'), lW[i] - 2));
         const rowH = Math.max(6, Math.max(...wrappedCells.map(w => w.length)) * 5 + 2);
         addPageIfNeeded(rowH);
