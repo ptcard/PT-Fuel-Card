@@ -142,11 +142,11 @@
     <div class="section-title">Applicant Type <span class="required">*</span></div>
     <div style="display:flex;gap:32px;margin-top:10px;">
       <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:15px;font-weight:600;color:#1a1a1a;">
-        <input type="radio" name="applicantType" id="type_corporate" value="Corporate" style="accent-color:#0C447C;width:18px;height:18px;cursor:pointer;">
+        <input type="radio" name="applicantType" id="type_corporate" value="Corporate" onchange="onApplicantTypeChange()" style="accent-color:#0C447C;width:18px;height:18px;cursor:pointer;">
         Corporate
       </label>
       <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:15px;font-weight:600;color:#1a1a1a;">
-        <input type="radio" name="applicantType" id="type_individual" value="Individual" style="accent-color:#0C447C;width:18px;height:18px;cursor:pointer;">
+        <input type="radio" name="applicantType" id="type_individual" value="Individual" onchange="onApplicantTypeChange()" style="accent-color:#0C447C;width:18px;height:18px;cursor:pointer;">
         Individual
       </label>
     </div>
@@ -239,8 +239,8 @@
             <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">1</td>
             <td><input type="text" placeholder="e.g. LR-1234" oninput="syncRegToLimits(this)"></td>
             <td><input type="text" placeholder="Name or number"></td>
-            <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">-</option><option>Yes</option><option>No</option></select></td>
-            <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">—</option><option>Diesel</option><option>Gasoline</option></select></td>
+            <td><select class="fuel-restrict-select" onchange="toggleFuelTypeField(this)" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">-</option><option>Yes</option><option>No</option></select></td>
+            <td><select class="fuel-type-select" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">—</option><option>Diesel</option><option>Gasoline</option></select></td>
             <td><input type="text" placeholder="e.g. Toyota Hilux"></td>
             <td><button class="del-btn" onclick="removeRow(this)">×</button></td>
           </tr>
@@ -545,6 +545,18 @@ be governed by and construed in accordance with the laws of Liberia. Any
         <input type="date" id="f_sig_date">
       </div>
     </div>
+    <div class="field-grid" id="positionFieldWrap" style="display:none;margin-bottom:14px;">
+      <div class="field">
+        <label>Position <span class="required">*</span></label>
+        <input type="text" id="f_sig_position" placeholder="Enter your position/title in the organization">
+      </div>
+    </div>
+    <div id="authCertWrap" style="display:none;margin-bottom:14px;">
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:#1a1a1a;line-height:1.5;">
+        <input type="checkbox" id="f_auth_cert" style="margin-top:3px;accent-color:#0C447C;width:16px;height:16px;cursor:pointer;flex-shrink:0;">
+        <span>The Undersigned certifies that they have the legal authority to sign on behalf of the organization. <span class="required">*</span></span>
+      </label>
+    </div>
     <label style="font-size:12px;color:#555;font-weight:500;display:block;margin-bottom:6px;">Signature <span class="required">*</span></label>
     <p style="font-size:13px;color:#666;margin-bottom:10px;">Draw your signature below using your mouse or finger (touch screens supported).</p>
     <div class="sig-outer">
@@ -596,6 +608,21 @@ identification. Accepted formats: JPG, PNG, HEIC, PDF. Max 10MB.</p>
 <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top" style="display: flex;">⇧</button>
 
 <script>
+function onApplicantTypeChange(){
+  const checked = document.querySelector('input[name="applicantType"]:checked');
+  const isCorporate = !!checked && checked.value === 'Corporate';
+  const posWrap = document.getElementById('positionFieldWrap');
+  const certWrap = document.getElementById('authCertWrap');
+  if(posWrap) posWrap.style.display = isCorporate ? 'grid' : 'none';
+  if(certWrap) certWrap.style.display = isCorporate ? 'block' : 'none';
+  if(!isCorporate){
+    const posInput = document.getElementById('f_sig_position');
+    const certInput = document.getElementById('f_auth_cert');
+    if(posInput) posInput.value = '';
+    if(certInput) certInput.checked = false;
+  }
+}
+
 function onCardManagementChange(radio){
   // Show the PT Card Portal user(s) table regardless of which
   // Card Management option (Customer Controlled or Petro Trade Controlled) is chosen.
@@ -651,8 +678,8 @@ function addRow(){
     <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">${rowNum}</td>
     <td><input type="text" placeholder="e.g. LR-1234" oninput="syncRegToLimits(this)"></td>
     <td><input type="text" placeholder="Name or number"></td>
-    <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">-</option><option>Yes</option><option>No</option></select></td>
-    <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">—</option><option>Diesel</option><option>Gasoline</option></select></td>
+    <td><select class="fuel-restrict-select" onchange="toggleFuelTypeField(this)" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">-</option><option>Yes</option><option>No</option></select></td>
+    <td><select class="fuel-type-select" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">—</option><option>Diesel</option><option>Gasoline</option></select></td>
     <td><input type="text" placeholder="e.g. Toyota Hilux"></td>
     <td><button class="del-btn" onclick="removeRow(this)">×</button></td>`;
   tb.appendChild(tr);
@@ -701,6 +728,19 @@ function toggleLocationField(selectEl){
   }
 }
 
+function toggleFuelTypeField(selectEl){
+  const row = selectEl.closest('tr');
+  if(!row) return;
+  const fuelSelect = row.querySelector('.fuel-type-select');
+  if(!fuelSelect) return;
+  if(selectEl.value === 'No'){
+    fuelSelect.disabled = true;
+    fuelSelect.selectedIndex = 0;
+  } else {
+    fuelSelect.disabled = false;
+  }
+}
+
 
 
 function syncRegToLimits(input) {
@@ -732,8 +772,8 @@ function syncRowsToCardCount(val) {
       <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">${num}</td>
       <td><input type="text" placeholder="e.g. LR-1234" oninput="syncRegToLimits(this)"></td>
       <td><input type="text" placeholder="Name or number"></td>
-      <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">-</option><option>Yes</option><option>No</option></select></td>
-      <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">—</option><option>Diesel</option><option>Gasoline</option></select></td>
+      <td><select class="fuel-restrict-select" onchange="toggleFuelTypeField(this)" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">-</option><option>Yes</option><option>No</option></select></td>
+      <td><select class="fuel-type-select" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">—</option><option>Diesel</option><option>Gasoline</option></select></td>
       <td><input type="text" placeholder="e.g. Toyota Hilux"></td>
       <td><button class="del-btn" onclick="removeRow(this)">×</button></td>`;
     return tr;
@@ -889,6 +929,8 @@ function collectFormData(){
     extraNotes: document.getElementById('f_notes').value||'-',
     sigName: document.getElementById('f_sig_name').value||'-',
     sigDate: document.getElementById('f_sig_date').value||'-',
+    sigPosition: document.getElementById('f_sig_position').value||'-',
+    authCert: document.getElementById('f_auth_cert').checked,
     idFileName: uploadedFile ? uploadedFile.name : '-',
     vehicleRows, limitRows, userRoles,
     submittedAt: new Date().toLocaleString()
@@ -973,6 +1015,12 @@ async function downloadAsPDF(){
   const sigDate = document.getElementById('f_sig_date').value;
   if(!sigName){ alert('Please enter your full name in Section 7.'); return; }
   if(!sigDate){ alert('Please enter the date in Section 7.'); return; }
+  if(applicantTypeEl.value === 'Corporate'){
+    const sigPosition = document.getElementById('f_sig_position').value.trim();
+    const authCert = document.getElementById('f_auth_cert').checked;
+    if(!sigPosition){ alert('Please enter your Position in Section 7.'); return; }
+    if(!authCert){ alert('Please tick the box in Section 7 certifying you have legal authority to sign on behalf of the organization.'); return; }
+  }
   if(!hasSig){ alert('Please provide your signature in Section 7.'); return; }
   if(!uploadedFile){ alert('Please upload your ID / Passport document in Section 7.'); return; }
 
@@ -1211,6 +1259,10 @@ async function downloadAsPDF(){
     // Section 7 - Signature
     sectionHeader('7. Signature');
     fieldPair('Full name', data.sigName, 'Date', formatDateDDMMYYYY(data.sigDate));
+    if(data.applicantType === 'Corporate'){
+      fieldFull('Position', data.sigPosition);
+      fieldFull('Authority to sign', data.authCert ? 'The Undersigned certifies that they have the legal authority to sign on behalf of the organization.' : 'Not certified');
+    }
     addPageIfNeeded(50);
     doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(100,100,100);
     doc.text('Signature', margin, y); y += 4;
@@ -1354,6 +1406,8 @@ function clearAllData() {
 
   // Hide conditional rows
   document.getElementById('portalUsernameRow').style.display = 'none';
+  document.getElementById('positionFieldWrap').style.display = 'none';
+  document.getElementById('authCertWrap').style.display = 'none';
 
   // Clear file upload
   document.getElementById('f_id_upload').value = '';
