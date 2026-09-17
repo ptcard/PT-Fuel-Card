@@ -237,7 +237,7 @@
         <tbody id="tableBody">
           <tr>
             <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">1</td>
-            <td><input type="text" placeholder="e.g. LR-1234" oninput="syncRegToLimits(this)"></td>
+            <td><input type="text" oninput="syncRegToLimits(this)"></td>
             <td><input type="text" placeholder="Name or number"></td>
             <td><select class="fuel-restrict-select" onchange="toggleFuelTypeField(this)" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">-</option><option>Yes</option><option>No</option></select></td>
             <td><select class="fuel-type-select" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">—</option><option>Diesel</option><option>Gasoline</option></select></td>
@@ -676,7 +676,7 @@ function addRow(){
   const tr = document.createElement('tr');
   tr.innerHTML = `
     <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">${rowNum}</td>
-    <td><input type="text" placeholder="e.g. LR-1234" oninput="syncRegToLimits(this)"></td>
+    <td><input type="text" oninput="syncRegToLimits(this)"></td>
     <td><input type="text" placeholder="Name or number"></td>
     <td><select class="fuel-restrict-select" onchange="toggleFuelTypeField(this)" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">-</option><option>Yes</option><option>No</option></select></td>
     <td><select class="fuel-type-select" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">—</option><option>Diesel</option><option>Gasoline</option></select></td>
@@ -744,6 +744,14 @@ function toggleFuelTypeField(selectEl){
 
 
 function syncRegToLimits(input) {
+  // Block "1234" as a Registration No. value
+  if (input.value.trim() === '1234') {
+    input.value = '';
+    if (typeof showToast === 'function') {
+      showToast('"1234" is not a permitted Registration No. Please enter a valid registration number.', 'warning');
+    }
+  }
+
   // Find the row index of this input in the vehicle table
   const vehicleRows = document.querySelectorAll('#tableBody tr');
   let rowIndex = -1;
@@ -770,7 +778,7 @@ function syncRowsToCardCount(val) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">${num}</td>
-      <td><input type="text" placeholder="e.g. LR-1234" oninput="syncRegToLimits(this)"></td>
+      <td><input type="text" oninput="syncRegToLimits(this)"></td>
       <td><input type="text" placeholder="Name or number"></td>
       <td><select class="fuel-restrict-select" onchange="toggleFuelTypeField(this)" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">-</option><option>Yes</option><option>No</option></select></td>
       <td><select class="fuel-type-select" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">—</option><option>Diesel</option><option>Gasoline</option></select></td>
@@ -981,6 +989,7 @@ async function downloadAsPDF(){
   for(let i = 0; i < vehicleTableRows.length; i++){
     const inputs = vehicleTableRows[i].querySelectorAll('input, select');
     if(!inputs[0].value.trim()){ alert('Row ' + (i+1) + ' in the vehicle table is missing a Registration No. (required).'); return; }
+    if(inputs[0].value.trim() === '1234'){ alert('Row ' + (i+1) + ' in the vehicle table: "1234" is not a permitted Registration No. Please enter a valid registration number.'); return; }
     if(!inputs[1].value.trim()){ alert('Row ' + (i+1) + ' in the vehicle table is missing a Name or Number (printed on card) (required).'); return; }
   }
   if(!favColor){ alert('Please select your favorite color (Security Question 1).'); return; }
