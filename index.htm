@@ -330,7 +330,7 @@ card can only be used for Gasoline)</p>
               <td><input type="text" placeholder="Enter full name"></td>
               <td><input type="text" placeholder="Enter desired username"></td>
               <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">— Select —</option><option>Yes</option><option>No</option></select></td>
-              <td><input type="text" placeholder="e.g. name@company.com"></td>
+              <td><input type="text" class="email-input" placeholder="e.g. name@company.com" oninput="checkDuplicateEmail(this)"></td>
               <td><button class="del-btn" onclick="removeUserRoleRow(this)">×</button></td>
             </tr>
           </tbody>
@@ -645,6 +645,22 @@ function applyRoleLockForCardManagement(){
   });
 }
 
+function checkDuplicateEmail(input){
+  const value = input.value.trim();
+  if(!value) return;
+  const allEmailInputs = document.querySelectorAll('#userRolesBody .email-input');
+  let duplicate = false;
+  allEmailInputs.forEach(el => {
+    if(el !== input && el.value.trim() && el.value.trim().toLowerCase() === value.toLowerCase()){
+      duplicate = true;
+    }
+  });
+  if(duplicate){
+    input.value = '';
+    alert('DUPLICATE EMAIL ADDRESS ERROR: This email address is already used in another row. Please enter a unique email address.');
+  }
+}
+
 function removeUserRoleRow(btn){
   const rows = document.querySelectorAll('#userRolesBody tr');
   if(rows.length > 1) btn.closest('tr').remove();
@@ -661,7 +677,7 @@ function addUserRoleRow(){
     <td><input type="text" placeholder="Enter full name"></td>
     <td><input type="text" placeholder="Enter desired username"></td>
     <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">— Select —</option><option>Yes</option><option>No</option></select></td>
-    <td><input type="text" placeholder="e.g. name@company.com"></td>
+    <td><input type="text" class="email-input" placeholder="e.g. name@company.com" oninput="checkDuplicateEmail(this)"></td>
     <td><button class="del-btn" onclick="removeUserRoleRow(this)">×</button></td>`;
   tb.appendChild(tr);
   applyRoleLockForCardManagement();
@@ -1002,6 +1018,7 @@ async function downloadAsPDF(){
   // At least one complete PT Card Portal user row is required
   const roleRows = document.querySelectorAll('#userRolesBody tr');
   let hasValidUser = false;
+  const seenEmailAddresses = new Set();
   for(let i = 0; i < roleRows.length; i++){
     const selects = roleRows[i].querySelectorAll('select');
     const inputs = roleRows[i].querySelectorAll('input[type="text"]');
@@ -1015,6 +1032,14 @@ async function downloadAsPDF(){
     if(anyFilled && !allFilled){
       alert('Row ' + (i+1) + ' in the PT Card Portal user table needs a User Role, Name, Username, Receive Transaction(s) Email Alert selection, and Email Address.');
       return;
+    }
+    if(emailAddressVal){
+      const emailKey = emailAddressVal.toLowerCase();
+      if(seenEmailAddresses.has(emailKey)){
+        alert('DUPLICATE EMAIL ADDRESS ERROR: Row ' + (i+1) + ' in the PT Card Portal user table uses an email address that is already used in another row. Each email address must be unique.');
+        return;
+      }
+      seenEmailAddresses.add(emailKey);
     }
     if(allFilled) hasValidUser = true;
   }
