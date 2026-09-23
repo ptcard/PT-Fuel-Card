@@ -314,18 +314,20 @@ card can only be used for Gasoline)</p>
         <table class="data-table" id="userRolesTable">
           <thead>
             <tr>
-              <th style="width:6%">#</th>
-              <th style="width:24%">User Role <span class="required">*</span></th>
-              <th style="width:20%">Username <span class="required">*</span></th>
-              <th style="width:22%">Receive Transaction(s) Email Alert <span class="required">*</span></th>
-              <th style="width:22%">Email Address <span class="required">*</span></th>
-              <th style="width:6%"></th>
+              <th style="width:5%">#</th>
+              <th style="width:20%">User Role <span class="required">*</span></th>
+              <th style="width:16%">Name <span class="required">*</span></th>
+              <th style="width:16%">Username <span class="required">*</span></th>
+              <th style="width:20%">Receive Transaction(s) Email Alert <span class="required">*</span></th>
+              <th style="width:18%">Email Address <span class="required">*</span></th>
+              <th style="width:5%"></th>
             </tr>
           </thead>
           <tbody id="userRolesBody">
             <tr>
               <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">1</td>
               <td><select class="role-select" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">— Select —</option><option>Fleet Manager- Customer Controlled</option><option>Customer Role</option></select></td>
+              <td><input type="text" placeholder="Enter full name"></td>
               <td><input type="text" placeholder="Enter desired username"></td>
               <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="" selected="selected">— Select —</option><option>Yes</option><option>No</option></select></td>
               <td><input type="text" placeholder="e.g. name@company.com"></td>
@@ -656,6 +658,7 @@ function addUserRoleRow(){
   tr.innerHTML = `
     <td style="text-align:center;font-weight:500;color:#555;padding:6px 4px;">${rowNum}</td>
     <td><select class="role-select" style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">— Select —</option><option>Fleet Manager- Customer Controlled</option><option>Customer Role</option></select></td>
+    <td><input type="text" placeholder="Enter full name"></td>
     <td><input type="text" placeholder="Enter desired username"></td>
     <td><select style="border:none;background:transparent;width:100%;font-size:13px;color:#1a1a1a;padding:6px"><option value="">— Select —</option><option>Yes</option><option>No</option></select></td>
     <td><input type="text" placeholder="e.g. name@company.com"></td>
@@ -908,11 +911,12 @@ function collectFormData(){
     const selects = row.querySelectorAll('select');
     const inputs = row.querySelectorAll('input[type="text"]');
     const role = selects[0].value;
-    const username = inputs[0].value.trim();
+    const name = inputs[0].value.trim();
+    const username = inputs[1].value.trim();
     const emailAlert = selects[1].value;
-    const emailAddress = inputs[1].value.trim();
-    if(role || username || emailAlert || emailAddress){
-      userRoles.push({ num: i+1, role: role||'-', username: username||'-', emailAlert: emailAlert||'-', emailAddress: emailAddress||'-' });
+    const emailAddress = inputs[2].value.trim();
+    if(role || name || username || emailAlert || emailAddress){
+      userRoles.push({ num: i+1, role: role||'-', name: name||'-', username: username||'-', emailAlert: emailAlert||'-', emailAddress: emailAddress||'-' });
     }
   });
   const applicantTypeRadio = document.querySelector('input[name="applicantType"]:checked');
@@ -1002,19 +1006,20 @@ async function downloadAsPDF(){
     const selects = roleRows[i].querySelectorAll('select');
     const inputs = roleRows[i].querySelectorAll('input[type="text"]');
     const roleVal = selects[0].value.trim();
-    const usernameVal = inputs[0].value.trim();
+    const nameVal = inputs[0].value.trim();
+    const usernameVal = inputs[1].value.trim();
     const emailAlertVal = selects[1].value.trim();
-    const emailAddressVal = inputs[1].value.trim();
-    const anyFilled = roleVal || usernameVal || emailAlertVal || emailAddressVal;
-    const allFilled = roleVal && usernameVal && emailAlertVal && emailAddressVal;
+    const emailAddressVal = inputs[2].value.trim();
+    const anyFilled = roleVal || nameVal || usernameVal || emailAlertVal || emailAddressVal;
+    const allFilled = roleVal && nameVal && usernameVal && emailAlertVal && emailAddressVal;
     if(anyFilled && !allFilled){
-      alert('Row ' + (i+1) + ' in the PT Card Portal user table needs a User Role, Username, Receive Transaction(s) Email Alert selection, and Email Address.');
+      alert('Row ' + (i+1) + ' in the PT Card Portal user table needs a User Role, Name, Username, Receive Transaction(s) Email Alert selection, and Email Address.');
       return;
     }
     if(allFilled) hasValidUser = true;
   }
   if(!hasValidUser){
-    alert('Please add at least one complete PT Card Portal user (User Role, Username, Receive Transaction(s) Email Alert, and Email Address).');
+    alert('Please add at least one complete PT Card Portal user (User Role, Name, Username, Receive Transaction(s) Email Alert, and Email Address).');
     return;
   }
 
@@ -1221,8 +1226,8 @@ async function downloadAsPDF(){
     addPageIfNeeded(20);
     doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(80,80,80);
     doc.text('PT Card Portal Users', margin, y); y += 5;
-    const uCols = ['#','User Role','Username','Email Alert','Email Address'];
-    const uW = [8, 38, 34, 30, 70];
+    const uCols = ['#','User Role','Name','Username','Email Alert','Email Address'];
+    const uW = [8, 32, 28, 28, 26, 58];
     doc.setFillColor(240,244,248);
     doc.rect(margin, y, col, 7, 'F');
     doc.setTextColor(85,85,85); doc.setFontSize(7); doc.setFont('helvetica','bold');
@@ -1231,7 +1236,7 @@ async function downloadAsPDF(){
     y += 7;
     if(data.userRoles.length > 0){
       data.userRoles.forEach((r,idx)=>{
-        const cellValues = [String(r.num), r.role, r.username, r.emailAlert, r.emailAddress];
+        const cellValues = [String(r.num), r.role, r.name, r.username, r.emailAlert, r.emailAddress];
         const wrappedCells = cellValues.map((v,i) => doc.splitTextToSize(String(v||'-'), uW[i] - 2));
         const rowH = Math.max(6, Math.max(...wrappedCells.map(w => w.length)) * 5 + 2);
         addPageIfNeeded(rowH);
