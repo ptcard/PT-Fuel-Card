@@ -635,9 +635,14 @@ function onCardManagementChange(radio){
 function applyRoleLockForCardManagement(){
   const checked = document.querySelector('input[name="cardManagement"]:checked');
   const isPetroTrade = !!checked && checked.value === 'Petro Trade Controlled';
-  document.querySelectorAll('#userRolesBody .role-select').forEach(sel => {
+  const isCustomerControlled = !!checked && checked.value === 'Customer Controlled';
+  document.querySelectorAll('#userRolesBody .role-select').forEach((sel, idx) => {
     if(isPetroTrade){
       sel.value = 'Customer Role';
+      sel.disabled = true;
+    } else if(isCustomerControlled && idx === 0){
+      // The first line in Section 3 must be Fleet Manager when Customer Controlled is selected.
+      sel.value = 'Fleet Manager- Customer Controlled';
       sel.disabled = true;
     } else {
       sel.disabled = false;
@@ -665,6 +670,7 @@ function removeUserRoleRow(btn){
   const rows = document.querySelectorAll('#userRolesBody tr');
   if(rows.length > 1) btn.closest('tr').remove();
   renumberUserRoleRows();
+  applyRoleLockForCardManagement();
 }
 
 function addUserRoleRow(){
