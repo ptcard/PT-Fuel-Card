@@ -41,7 +41,10 @@
   .table-wrapper { overflow-x: auto; }
   table.data-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; min-width: 560px; }
   table.data-table th { background: #f0f4f8; color: #555; font-weight: 600; font-size: 11px; padding: 9px 6px; border: 1px solid #dde2ea; text-align: left; text-transform: uppercase; letter-spacing: .3px; word-break: break-word; overflow-wrap: break-word; hyphens: auto; }
-  #limitsTable { min-width: 780px; }
+  #limitsTable { min-width: 920px; }
+  .custom-days-cell { display: flex; align-items: stretch; gap: 0; }
+  .custom-days-cell select.custom-days-select { flex: 0 0 46%; width: 46% !important; border-right: 1px solid #dde2ea !important; border-radius: 0 !important; padding: 6px 2px !important; }
+  .custom-days-cell input.custom-days-amount { flex: 1 1 auto; width: auto !important; min-width: 0; }
   table.data-table td { padding: 4px 4px; border: 1px solid #dde2ea; }
   table.data-table td input, table.data-table td select {
     border: none; background: transparent; width: 100%;
@@ -265,12 +268,13 @@ card can only be used for Gasoline)</p>
         <thead>
           <tr>
             <th style="width:4%">#</th>
-            <th style="width:16%">Registration no.</th>
-            <th style="width:17%">Limit type</th>
-            <th style="width:16%">Location</th>
-            <th style="width:14%">Per day</th>
-            <th style="width:14%">Per week</th>
-            <th style="width:14%">Per month</th>
+            <th style="width:13%">Registration no.</th>
+            <th style="width:15%">Limit type</th>
+            <th style="width:14%">Location</th>
+            <th style="width:11%">Per day</th>
+            <th style="width:11%">Per week</th>
+            <th style="width:11%">Per month</th>
+            <th style="width:16%">No. of days (custom)</th>
             <th style="width:5%"></th>
           </tr>
         </thead>
@@ -283,6 +287,7 @@ card can only be used for Gasoline)</p>
             <td><input type="text" placeholder="0.00"></td>
             <td><input type="text" placeholder="0.00"></td>
             <td><input type="text" placeholder="0.00"></td>
+            <td><div class="custom-days-cell"><select class="custom-days-select" title="Number of days"><option value="" selected="selected">Days</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option></select><input type="text" class="custom-days-amount" placeholder="0.00" title="Limit for the selected number of days"></div></td>
             <td><button class="del-btn" onclick="removeLimitRow(this)">×</button></td>
           </tr>
         </tbody>
@@ -754,8 +759,16 @@ function addLimitRow(){
     <td><input type="text" placeholder="0.00"></td>
     <td><input type="text" placeholder="0.00"></td>
     <td><input type="text" placeholder="0.00"></td>
+    <td>${customDaysCellHTML()}</td>
     <td><button class="del-btn" onclick="removeLimitRow(this)">×</button></td>`;
   tb.appendChild(tr);
+}
+
+function customDaysCellHTML(){
+  let opts = '<option value="" selected>Days</option>';
+  for (let d = 1; d <= 30; d++) opts += '<option>' + d + '</option>';
+  return '<div class="custom-days-cell"><select class="custom-days-select" title="Number of days">' + opts + '</select>' +
+         '<input type="text" class="custom-days-amount" placeholder="0.00" title="Limit for the selected number of days"></div>';
 }
 
 function locationSelectHTML(){
@@ -907,6 +920,7 @@ function syncRowsToCardCount(val) {
       <td><input type="text" placeholder="0.00"></td>
       <td><input type="text" placeholder="0.00"></td>
       <td><input type="text" placeholder="0.00"></td>
+      <td>${customDaysCellHTML()}</td>
       <td><button class="del-btn" onclick="removeLimitRow(this)">×</button></td>`;
     return tr;
   }
@@ -1025,7 +1039,9 @@ function collectFormData(){
     // Collect row if ANY field has data
     const hasData = Array.from(inputs).some(el => el.value && el.value.trim() !== '' && el.value !== '—' && el.value !== '-');
     if(hasData){
-      limitRows.push({ num: i+1, reg: inputs[0].value||'-', type: inputs[1].value||'-', location: inputs[2].value||'-', day: inputs[3].value||'-', week: inputs[4].value||'-', month: inputs[5].value||'-' });
+      limitRows.push({ num: i+1, reg: inputs[0].value||'-', type: inputs[1].value||'-', location: inputs[2].value||'-', day: inputs[3].value||'-', week: inputs[4].value||'-', month: inputs[5].value||'-',
+        customDays: row.querySelector('.custom-days-select') ? row.querySelector('.custom-days-select').value : '',
+        customAmount: row.querySelector('.custom-days-amount') ? row.querySelector('.custom-days-amount').value.trim() : '' });
     }
   });
   const userRoles = [];
@@ -1117,6 +1133,15 @@ async function downloadAsPDF(){
     if(!inputs[0].value.trim()){ alert('Row ' + (i+1) + ' in the vehicle table is missing a Registration No. (required).'); return; }
     if(inputs[0].value.trim() === '1234'){ alert('Row ' + (i+1) + ' in the vehicle table: "1234" is not a permitted Registration No. Please enter a valid registration number.'); return; }
     if(!inputs[1].value.trim()){ alert('Row ' + (i+1) + ' in the vehicle table is missing a Name or Number (printed on card) (required).'); return; }
+  }
+  // Custom days: both the number of days and the amount must be filled together
+  const limitTableRows = document.querySelectorAll('#limitsBody tr');
+  for(let i = 0; i < limitTableRows.length; i++){
+    const dSel = limitTableRows[i].querySelector('.custom-days-select');
+    const dAmt = limitTableRows[i].querySelector('.custom-days-amount');
+    if(!dSel || !dAmt) continue;
+    if(dSel.value && !dAmt.value.trim()){ alert('Row ' + (i+1) + ' in Card limitations: please enter the amount for the selected No. of days (custom).'); dAmt.focus(); return; }
+    if(!dSel.value && dAmt.value.trim()){ alert('Row ' + (i+1) + ' in Card limitations: please select the No. of days (custom) for the amount entered.'); dSel.focus(); return; }
   }
   // Block submission if any Registration No. is duplicated
   for(let i = 0; i < vehicleTableRows.length; i++){
@@ -1321,8 +1346,8 @@ async function downloadAsPDF(){
     addPageIfNeeded(20);
     doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(80,80,80);
     doc.text('Card Limitations', margin, y); y += 5;
-    const lCols = ['#','Reg No.','Limit Type','Location','Per Day','Per Week','Per Month'];
-    const lW = [8, 28, 30, 28, 24, 24, 24];
+    const lCols = ['#','Reg No.','Limit Type','Location','Per Day','Per Week','Per Month','Custom Days'];
+    const lW = [8, 24, 28, 26, 20, 20, 20, 34];
     doc.setFillColor(240,244,248);
     doc.rect(margin, y, col, 7, 'F');
     doc.setTextColor(85,85,85); doc.setFontSize(7); doc.setFont('helvetica','bold');
@@ -1331,7 +1356,8 @@ async function downloadAsPDF(){
     y += 7;
     if(data.limitRows.length > 0){
       data.limitRows.forEach((r,idx)=>{
-        const cellValues = [String(r.num),r.reg,r.type,r.location,r.day,r.week,r.month];
+        const customTxt = (r.customDays || r.customAmount) ? ((r.customDays ? r.customDays + (r.customDays === '1' ? ' day' : ' days') : '- days') + ': ' + (r.customAmount || '-')) : '-';
+        const cellValues = [String(r.num),r.reg,r.type,r.location,r.day,r.week,r.month,customTxt];
         const wrappedCells = cellValues.map((v,i) => doc.splitTextToSize(String(v||'-'), lW[i] - 2));
         const rowH = Math.max(6, Math.max(...wrappedCells.map(w => w.length)) * 5 + 2);
         addPageIfNeeded(rowH);
