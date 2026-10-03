@@ -102,6 +102,12 @@
     cursor: pointer; transition: background .15s;
   }
   .modal-close-btn:hover { background: #185FA5; }
+  /* Duplicate error popup */
+  #duplicateModal .modal-icon { background: #FCEBEB; }
+  #duplicateModal h3 { color: #c0392b; }
+  #duplicateModal .modal-close-btn { background: #c0392b; }
+  #duplicateModal .modal-close-btn:hover { background: #a93226; }
+  #duplicateModal .dup-reg { font-weight: 700; color: #1a1a1a; }
 
   .setup-note { background: #EBF4FF; border: 1px solid #B5D4F4; border-radius: 10px; padding: 1.25rem 1.5rem; margin-top: 1.25rem; font-size: 13px; color: #0C447C; }
   .setup-note strong { font-weight: 600; display: block; margin-bottom: 6px; font-size: 14px; }
@@ -609,6 +615,20 @@ identification. Accepted formats: JPG, PNG, HEIC, PDF. Max 10MB.</p>
   </div>
 </div>
 
+<!-- Duplicate Registration No. popup -->
+<div class="modal-overlay" id="duplicateModal" onclick="if(event.target===this)closeDuplicateModal()">
+  <div class="modal-box" role="alertdialog" aria-modal="true" aria-labelledby="duplicateModalTitle">
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 6l12 12M18 6L6 18" stroke="#c0392b" stroke-width="2.5" stroke-linecap="round"></path>
+      </svg>
+    </div>
+    <h3 id="duplicateModalTitle">Duplicate Error</h3>
+    <p id="duplicateModalMsg"></p>
+    <button class="modal-close-btn" onclick="closeDuplicateModal()">OK</button>
+  </div>
+</div>
+
 <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top" style="display: flex;">⇧</button>
 
 <script>
@@ -794,6 +814,64 @@ function syncRegToLimits(input) {
     if (limitRegInput) limitRegInput.value = input.value;
   }
 }
+// ---- Duplicate Registration No. check (Section 2 vehicle table) ----
+function normalizeReg(v) {
+  return (v || '').replace(/\s+/g, '').toUpperCase();
+}
+
+let dupFocusTarget = null;
+function showDuplicateModal(regValue, rowNum, otherRowNum, input) {
+  const msg = document.getElementById('duplicateModalMsg');
+  msg.textContent = '';
+  msg.append('Registration No. ');
+  const b = document.createElement('span');
+  b.className = 'dup-reg';
+  b.textContent = regValue;
+  msg.append(b);
+  msg.append(' in row ' + rowNum + ' is already entered in row ' + otherRowNum + '. The duplicate entry has been removed.');
+  dupFocusTarget = input || null;
+  document.getElementById('duplicateModal').classList.add('show');
+}
+function closeDuplicateModal() {
+  document.getElementById('duplicateModal').classList.remove('show');
+  if (dupFocusTarget) { dupFocusTarget.focus(); dupFocusTarget = null; }
+}
+
+// Returns the 1-based row number of an earlier row with the same reg, or 0 if none.
+function findDuplicateReg(input) {
+  const val = normalizeReg(input.value);
+  if (!val) return 0;
+  const rows = document.querySelectorAll('#tableBody tr');
+  for (let i = 0; i < rows.length; i++) {
+    const other = rows[i].querySelector('input');
+    if (other && other !== input && normalizeReg(other.value) === val) return i + 1;
+  }
+  return 0;
+}
+
+function checkDuplicateReg(input) {
+  const otherRow = findDuplicateReg(input);
+  if (!otherRow) return false;
+  const rows = Array.from(document.querySelectorAll('#tableBody tr'));
+  const thisRow = rows.indexOf(input.closest('tr')) + 1;
+  const entered = input.value.trim();
+  input.value = '';
+  syncRegToLimits(input); // clear the auto-filled value in Card limitations too
+  showDuplicateModal(entered, thisRow, otherRow, input);
+  return true;
+}
+
+// Check when the user leaves a Registration No. field (covers rows added later too)
+document.addEventListener('change', function (e) {
+  const el = e.target;
+  if (el.tagName === 'INPUT' && el.closest('#tableBody') && el === el.closest('tr').querySelector('input')) {
+    checkDuplicateReg(el);
+  }
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && document.getElementById('duplicateModal').classList.contains('show')) closeDuplicateModal();
+});
+
 function syncRowsToCardCount(val) {
   const count = parseInt(val);
   if (isNaN(count) || count < 1) return;
@@ -1039,6 +1117,11 @@ async function downloadAsPDF(){
     if(!inputs[0].value.trim()){ alert('Row ' + (i+1) + ' in the vehicle table is missing a Registration No. (required).'); return; }
     if(inputs[0].value.trim() === '1234'){ alert('Row ' + (i+1) + ' in the vehicle table: "1234" is not a permitted Registration No. Please enter a valid registration number.'); return; }
     if(!inputs[1].value.trim()){ alert('Row ' + (i+1) + ' in the vehicle table is missing a Name or Number (printed on card) (required).'); return; }
+  }
+  // Block submission if any Registration No. is duplicated
+  for(let i = 0; i < vehicleTableRows.length; i++){
+    const regInput = vehicleTableRows[i].querySelector('input');
+    if(findDuplicateReg(regInput) && findDuplicateReg(regInput) < i + 1){ checkDuplicateReg(regInput); return; }
   }
   if(!favColor){ alert('Please select your favorite color (Security Question 1).'); return; }
   if(!favNumber){ alert('Please select your favorite number (Security Question 2).'); return; }
