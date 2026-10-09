@@ -1389,7 +1389,8 @@ async function downloadAsPDF(){
     doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(80,80,80);
     doc.text('PT Card Portal Users', margin, y); y += 5;
     const uCols = ['#','User Role','Name','Username','Email Alert','Email Address'];
-    const uW = [8, 32, 28, 28, 26, 58];
+    const uW = [8, 44, 32, 26, 18, 52];   // total 180; wider User Role so it never runs into Name
+    const U_PAD = 4;                       // gap between columns so wrapped text never touches the next column
     doc.setFillColor(240,244,248);
     doc.rect(margin, y, col, 7, 'F');
     doc.setTextColor(85,85,85); doc.setFontSize(7); doc.setFont('helvetica','bold');
@@ -1399,7 +1400,8 @@ async function downloadAsPDF(){
     if(data.userRoles.length > 0){
       data.userRoles.forEach((r,idx)=>{
         const cellValues = [String(r.num), r.role, r.name, r.username, r.emailAlert, r.emailAddress];
-        const wrappedCells = cellValues.map((v,i) => doc.splitTextToSize(String(v||'-'), uW[i] - 2));
+        doc.setFont('helvetica','normal'); doc.setFontSize(8); // measure with the same font used to draw
+        const wrappedCells = cellValues.map((v,i) => doc.splitTextToSize(String(v||'-'), uW[i] - U_PAD));
         const rowH = Math.max(6, Math.max(...wrappedCells.map(w => w.length)) * 5 + 2);
         addPageIfNeeded(rowH);
         if(idx%2===0){ doc.setFillColor(250,251,252); doc.rect(margin, y, col, rowH, 'F'); }
