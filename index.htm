@@ -1226,7 +1226,7 @@ async function downloadAsPDF(){
 
     const jsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
     if (!jsPDF) throw new Error('jsPDF library failed to load. Please check your internet connection.');
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
     const W = 210; const margin = 15; const col = W - margin * 2;
     let y = 15;
 
@@ -1444,7 +1444,7 @@ async function downloadAsPDF(){
     addPageIfNeeded(50);
     doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(100,100,100);
     doc.text('Signature', margin, y); y += 4;
-    doc.addImage(canvas.toDataURL('image/png'), 'PNG', margin, y, 100, 40);
+    doc.addImage(canvas.toDataURL('image/png'), 'PNG', margin, y, 100, 40, undefined, 'FAST');
     doc.setDrawColor(180,180,180);
     doc.rect(margin, y, 100, 40);
     y += 44;
@@ -1478,13 +1478,13 @@ async function downloadAsPDF(){
         const pdfDoc2 = await pdfJsLib.getDocument({data: bytes}).promise;
         for(let pageNum=1; pageNum<=pdfDoc2.numPages; pageNum++){
           const page = await pdfDoc2.getPage(pageNum);
-          const viewport = page.getViewport({scale: 2.0});
+          const viewport = page.getViewport({scale: 1.5});
           const canvas = document.createElement('canvas');
           canvas.width = viewport.width;
           canvas.height = viewport.height;
           const ctx = canvas.getContext('2d');
           await page.render({canvasContext: ctx, viewport}).promise;
-          const imgData = canvas.toDataURL('image/jpeg', 0.92);
+          const imgData = canvas.toDataURL('image/jpeg', 0.7);
           // Calculate dimensions to fit within page width
           const imgW = col;
           const imgH = Math.min((viewport.height / viewport.width) * col, 250);
@@ -1512,10 +1512,14 @@ async function downloadAsPDF(){
       y += 25;
     } else {
       try {
-        const imgFormat = idMime.includes('png') ? 'PNG' : 'JPEG';
-        doc.addImage(idFileData, imgFormat, margin, y, col, 200, undefined, 'FAST');
+        const small = await shrinkImageForPdf(idFileData, 1600, 0.72);
+        // Fit inside the available area while keeping the original proportions
+        const maxH = 200;
+        let imgW = col, imgH = col * small.h / small.w;
+        if (imgH > maxH) { imgH = maxH; imgW = maxH * small.w / small.h; }
+        doc.addImage(small.data, 'JPEG', margin, y, imgW, imgH, undefined, 'FAST');
         doc.setDrawColor(180,180,180);
-        doc.rect(margin, y, col, 200);
+        doc.rect(margin, y, imgW, imgH);
       } catch(imgErr){
         doc.setFontSize(9); doc.setTextColor(100,100,100);
         doc.text('Could not embed image. File: ' + data.idFileName, margin, y + 10);
@@ -1645,6 +1649,27 @@ async function ensurePdfJs() {
     } catch(e) {}
   }
   throw new Error('Could not load pdf.js library');
+}
+
+// Shrink an uploaded image (phone photos can be several MB) before putting it in the PDF.
+// Scales the longest side down to maxSide pixels and re-encodes as JPEG on a white background.
+function shrinkImageForPdf(dataUrl, maxSide, quality) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width * scale));
+      const h = Math.max(1, Math.round(img.height * scale));
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h); // transparent PNGs -> white, not black
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve({ data: c.toDataURL('image/jpeg', quality), w, h });
+    };
+    img.onerror = () => reject(new Error('Could not read image'));
+    img.src = dataUrl;
+  });
 }
 </script>
 
