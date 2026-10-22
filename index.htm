@@ -226,7 +226,7 @@
     <div class="field-grid">
       <div class="field">
         <label>Number of cards requested <span class="required">*</span></label>
-        <input type="number" id="f_num_cards" placeholder="e.g. 3" min="1" onchange="syncRowsToCardCount(this.value)" onkeydown="if(event.key==='Enter'){this.blur();}" onwheel="this.blur()">
+        <input type="number" id="f_num_cards" placeholder="e.g. 3" min="1" max="100" value="1" onchange="syncRowsToCardCount(this.value)" onkeydown="if(event.key==='Enter'){this.blur();}" onwheel="this.blur()">
       </div>
     </div>
     <p style="font-size:13px;color:#666;margin:14px 0 10px">Add one row per vehicle or asset. Click <strong>+ Add row</strong> to include more.</p>
@@ -293,7 +293,7 @@ card can only be used for Gasoline)</p>
         </tbody>
       </table>
     </div>
-    <button class="add-row-btn" onclick="addLimitRow()">+ Add row</button>
+    <p style="font-size:12px;color:#888;margin-top:8px">One limitation row per card — rows follow the Number of cards requested. × clears a row.</p>
   </div>
 
   <!-- Card Management -->
@@ -735,11 +735,32 @@ function addRow(){
     <td><input type="text" placeholder="e.g. Toyota Hilux"></td>
     <td><button class="del-btn" onclick="removeRow(this)">×</button></td>`;
   tb.appendChild(tr);
+  addLimitRow();
+  renumberCardRows();
 }
 
+// Limitation rows are tied 1:1 to cards, so × clears the row instead of deleting it.
 function removeLimitRow(btn){
-  const rows = document.querySelectorAll('#limitsBody tr');
-  if(rows.length > 1) btn.closest('tr').remove();
+  const row = btn.closest('tr');
+  row.querySelectorAll('input:not([readonly])').forEach(el => el.value = '');
+  row.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  const loc = row.querySelector('.loc-select');
+  if(loc) loc.disabled = true;
+}
+
+// Keep vehicle rows, limitation rows and the "Number of cards requested" field in step.
+function renumberCardRows(){
+  const vRows = document.querySelectorAll('#tableBody tr');
+  const lRows = document.querySelectorAll('#limitsBody tr');
+  vRows.forEach((row, i) => { row.querySelector('td').textContent = i + 1; });
+  lRows.forEach((row, i) => {
+    row.querySelector('td').textContent = i + 1;
+    row.setAttribute('data-row-index', i);
+    const regIn = row.querySelector('input');
+    const vReg = vRows[i] ? vRows[i].querySelector('input') : null;
+    if(regIn) regIn.value = vReg ? vReg.value : '';
+  });
+  document.getElementById('f_num_cards').value = vRows.length;
 }
 
 function addLimitRow(){
@@ -886,8 +907,13 @@ document.addEventListener('keydown', function (e) {
 });
 
 function syncRowsToCardCount(val) {
-  const count = parseInt(val);
-  if (isNaN(count) || count < 1) return;
+  const MAX_CARDS = 100;
+  let count = parseInt(val);
+  if (isNaN(count) || count < 1) { renumberCardRows(); return; }
+  if (count > MAX_CARDS) {
+    alert('A maximum of ' + MAX_CARDS + ' cards can be requested on one form.');
+    count = MAX_CARDS;
+  }
 
   const vehicleBody = document.getElementById('tableBody');
   const limitsBody = document.getElementById('limitsBody');
@@ -961,11 +987,18 @@ function syncRowsToCardCount(val) {
 
   syncTable(vehicleBody, makeVehicleRow);
   syncTable(limitsBody, makeLimitRow);
+  renumberCardRows();
 }
 
+// Removing a card removes its vehicle row AND its limitation row, then updates the count.
 function removeRow(btn){
-  const rows = document.querySelectorAll('#tableBody tr');
-  if(rows.length > 1) btn.closest('tr').remove();
+  const vRows = Array.from(document.querySelectorAll('#tableBody tr'));
+  if(vRows.length <= 1){ alert('At least one card is required.'); return; }
+  const idx = vRows.indexOf(btn.closest('tr'));
+  const lRows = document.querySelectorAll('#limitsBody tr');
+  vRows[idx].remove();
+  if(lRows[idx]) lRows[idx].remove();
+  renumberCardRows();
 }
 
 const canvas = document.getElementById('sigCanvas');
@@ -1575,6 +1608,7 @@ function clearAllData() {
   limitsBody.querySelectorAll('input').forEach(el => el.value = '');
   limitsBody.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
   limitsBody.querySelectorAll('.loc-select').forEach(el => el.disabled = true);
+  renumberCardRows(); // count back to 1, matching the single remaining row
 
   // Reset PT Card Portal users table to 1 row
   const userRolesBody = document.getElementById('userRolesBody');
