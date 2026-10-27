@@ -134,6 +134,9 @@
     .logo-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
     .section { padding: 1rem 1rem; }
   }
+.modal-copy-btn{background:#fff !important;color:#0C447C !important;border:1.5px solid #0C447C !important;}
+.modal-copy-btn + .modal-close-btn{margin-top:10px;}
+.modal-copy-btn:hover{background:#E6F1FB !important;}
 </style>
 </head>
 <body>
@@ -616,7 +619,8 @@ identification. Accepted formats: JPG, PNG, HEIC, PDF. Max 10MB.</p>
     <h3 id="successModalTitle">Form Submitted Successfully</h3>
     <p>Thank you. Your fuel card application has been sent to Petro Trade.</p>
     <p class="modal-email-line">For any questions, contact<br><span class="modal-email">sales@petrotrade.ws</span></p>
-    <button class="modal-close-btn" onclick="closeSuccessModal()">Got it</button>
+    <button class="modal-close-btn modal-copy-btn" id="downloadCopyBtn" onclick="downloadSubmittedCopy()">Download a copy (PDF)</button>
+    <button class="modal-close-btn" onclick="closeSuccessModal()">Close</button>
   </div>
 </div>
 
@@ -1138,6 +1142,13 @@ document.addEventListener('keydown', function(e){
 
 
 // Power Automate flow that emails the completed application to sales@petrotrade.ws
+// Copy of the last successfully sent application, so the customer can save it from the success popup
+let lastSubmittedPdf = null;
+function downloadSubmittedCopy(){
+  if (!lastSubmittedPdf) return;
+  lastSubmittedPdf.doc.save(lastSubmittedPdf.fileName);
+}
+
 const SUBMIT_FLOW_URL = 'https://default73d351347b7e475e9dab28a3ad4bcd.aa.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/01/workflows/f3193242bdd742c3be8b3279749dacdd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=gcg0BJC8EhZj_WwAU-eMXgcZk51KcV3uQWqROvNCFU4';
 
 async function downloadAsPDF(){
@@ -1592,6 +1603,7 @@ async function downloadAsPDF(){
     }
     if (!res.ok) throw new Error('The application could not be sent (error ' + res.status + '). Please try again.');
 
+    lastSubmittedPdf = { doc: doc, fileName: fileName };
     showToast('Application submitted successfully!', 'success');
     showSuccessModal();
     btn.textContent = 'Submit Application';
