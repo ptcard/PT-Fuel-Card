@@ -597,7 +597,7 @@ identification. Accepted formats: JPG, PNG, HEIC, PDF. Max 10MB.</p>
     </div>
   </div>
 
-  <button class="submit-btn" id="downloadBtn" onclick="downloadAsPDF()" style="background:#0C447C;">Submit &amp; Download PDF File</button>
+  <button class="submit-btn" id="downloadBtn" onclick="downloadAsPDF()" style="background:#0C447C;">Submit Application</button>
   <button class="submit-btn" onclick="clearAllData()" style="background:#fff;color:#c0392b;border:1.5px solid #c0392b;margin-top:0.75rem;">Clear All Data</button>
   <div class="toast" id="toast"></div>
 
@@ -614,8 +614,8 @@ identification. Accepted formats: JPG, PNG, HEIC, PDF. Max 10MB.</p>
       </svg>
     </div>
     <h3 id="successModalTitle">Form Submitted Successfully</h3>
-    <p>Your fuel card application PDF has been downloaded.</p>
-    <p class="modal-email-line">Please email the PDF file to<br><span class="modal-email">sales@petrotrade.ws</span></p>
+    <p>Thank you. Your fuel card application has been sent to Petro Trade.</p>
+    <p class="modal-email-line">For any questions, contact<br><span class="modal-email">sales@petrotrade.ws</span></p>
     <button class="modal-close-btn" onclick="closeSuccessModal()">Got it</button>
   </div>
 </div>
@@ -1137,6 +1137,9 @@ document.addEventListener('keydown', function(e){
 });
 
 
+// Power Automate flow that emails the completed application to sales@petrotrade.ws
+const SUBMIT_FLOW_URL = 'https://default73d351347b7e475e9dab28a3ad4bcd.aa.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/01/workflows/f3193242bdd742c3be8b3279749dacdd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=gcg0BJC8EhZj_WwAU-eMXgcZk51KcV3uQWqROvNCFU4';
+
 async function downloadAsPDF(){
   const applicantTypeEl = document.querySelector('input[name="applicantType"]:checked');
   if(!applicantTypeEl){ alert('Please select an Applicant Type: Corporate or Individual.'); return; }
@@ -1235,14 +1238,14 @@ async function downloadAsPDF(){
 
 
   const btn = document.getElementById('downloadBtn');
-  btn.textContent = 'Generating PDF...';
+  btn.textContent = 'Preparing application...';
   btn.disabled = true;
 
   try {
     const loaded = await ensureJsPDF();
     if (!loaded) {
       showToast('Could not load PDF library. Please check your internet connection and try again.', 'warning');
-      btn.textContent = 'Submit & Download PDF File';
+      btn.textContent = 'Submit Application';
       btn.disabled = false;
       return;
     }
@@ -1572,17 +1575,32 @@ async function downloadAsPDF(){
     }
 
     const safeName = data.name.replace(/[^a-zA-Z0-9]/g,'_');
-    doc.save('PetroTrade_FuelCard_' + safeName + '.pdf');
+    const fileName = 'PetroTrade_FuelCard_' + safeName + '.pdf';
 
-    showToast('PDF downloaded successfully! Please send it to sales@petrotrade.ws', 'success');
+    // Send the PDF to the Power Automate flow, which emails it to Petro Trade
+    btn.textContent = 'Sending...';
+    const pdfBase64 = doc.output('datauristring').split(',')[1];
+    let res;
+    try {
+      res = await fetch(SUBMIT_FLOW_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName: fileName, applicantName: data.name, pdfBase64: pdfBase64 })
+      });
+    } catch (netErr) {
+      throw new Error('Could not reach the server. Please check your internet connection and try again.');
+    }
+    if (!res.ok) throw new Error('The application could not be sent (error ' + res.status + '). Please try again.');
+
+    showToast('Application submitted successfully!', 'success');
     showSuccessModal();
-    btn.textContent = 'Submit & Download PDF File';
+    btn.textContent = 'Submit Application';
     btn.disabled = false;
 
   } catch(err){
-    console.error('PDF error:', err);
-    showToast('Failed to generate PDF: ' + err.message, 'warning');
-    btn.textContent = 'Submit & Download PDF File';
+    console.error('Submit error:', err);
+    showToast('Submission failed: ' + err.message, 'warning');
+    btn.textContent = 'Submit Application';
     btn.disabled = false;
   }
 }
